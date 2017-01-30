@@ -27,7 +27,6 @@ namespace DeadCode.CodeAnalysis
 					using (var cancel = new CancellationTokenSource())
 					{
 						var project = solution.GetProject(projectId);
-						Console.WriteLine($"Compiling {project.Name}");
 
 						var compilation = project.GetCompilationAsync(cancel.Token).Result
 							.WithOptions(project.CompilationOptions)

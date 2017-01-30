@@ -41,8 +41,6 @@ namespace DeadCode.CodeAnalysis
 		{
 			var symbol = Model.GetDeclaredSymbol(node);
 			var cls = Parts.GetClass(symbol);
-			Console.WriteLine($"- {cls}");
-
 			var nodes = node.ChildNodes().ToList();
 			VisitConstructorDeclerations(node, cls);
 			VisitPropertyDeclarations(node, cls);
@@ -54,7 +52,6 @@ namespace DeadCode.CodeAnalysis
 			{
 				var symbol = Model.GetSymbolInfo(child);
 				//var prop = Parts.GetProperty(cls, symbol);
-				//Console.WriteLine($"- {prop}");
 				//VisitImplementation(child, prop);
 			}
 		}
@@ -64,7 +61,6 @@ namespace DeadCode.CodeAnalysis
 			{
 				var symbol = (IPropertySymbol)Model.GetDeclaredSymbol(child);
 				var prop = Parts.GetProperty(cls, symbol);
-				Console.WriteLine($"- {prop}");
 				VisitImplementation(child, prop);
 			}
 		}
@@ -75,7 +71,6 @@ namespace DeadCode.CodeAnalysis
 			{
 				var symbol = (IMethodSymbol)Model.GetDeclaredSymbol(child);
 				CodeMethod meth = Parts.GetMethod(cls, symbol);
-				Console.WriteLine($"- {meth}");
 				VisitImplementation(child, meth);
 			}
 		}

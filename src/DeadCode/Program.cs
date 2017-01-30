@@ -16,9 +16,9 @@ namespace DeadCode
 			var context = new VerifyContext(solution, parts);
 			Verifier.Verify(context);
 
-			foreach (var cls in parts.Classes)
+			foreach (var part in parts)
 			{
-				Console.WriteLine(cls);
+				Console.WriteLine($"{part}, {part.Count}");
 			}
 		}
 	}
