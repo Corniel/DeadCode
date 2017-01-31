@@ -16,6 +16,10 @@ namespace DeadCode.UnitTests
 			var context = new VerifyContext(solution, parts);
 			Verifier.Verify(context);
 
+			var cs_Main = parts["Xample.DeadCode.CSharp#Program:Main(#)"];
+
+			var act = parts.RemovePart(cs_Main);
+
 			foreach (var part in parts)
 			{
 				Console.WriteLine($"{part}, {part.Count}");

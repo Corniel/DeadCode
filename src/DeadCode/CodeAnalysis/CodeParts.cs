@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System;
 
 namespace DeadCode.CodeAnalysis
 {
@@ -13,8 +12,9 @@ namespace DeadCode.CodeAnalysis
 	{
 		private readonly Dictionary<string, CodePart> collection = new Dictionary<string, CodePart>();
 
-		public int Count => collection.Count;
+		public CodePart this[string key] => collection[key];
 
+		public int Count => collection.Count;
 
 		public IEnumerable<CodeClass> Classes => this.Where(p => p is CodeClass).Cast<CodeClass>();
 
@@ -63,6 +63,24 @@ namespace DeadCode.CodeAnalysis
 				cls.Add((CodeMethod)meth);
 			}
 			return (CodeMethod)meth;
+		}
+
+		public int RemovePart(CodePart part)
+		{
+			Guard.NotNull(part, nameof(part));
+			var sum = 0;
+
+			CodePart selected;
+			if(collection.TryGetValue(part.Key, out selected))
+			{
+				
+				foreach(var called in selected.CallsTo)
+				{
+					sum += RemovePart(part);
+				}
+				collection.Remove(part.Key);
+			}
+			return sum;
 		}
 
 		public IEnumerator<CodePart> GetEnumerator() => collection.Values.OrderBy(v => v).GetEnumerator();

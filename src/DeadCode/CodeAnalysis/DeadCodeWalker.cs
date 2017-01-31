@@ -104,6 +104,9 @@ namespace DeadCode.CodeAnalysis
 
 			var cls = Parts.TryGetClass(symbol.ContainingType);
 
+			// Externally defined. We don't care.
+			if (cls == null) { return; }
+
 			if (symbol is IPropertySymbol)
 			{
 				var prop = Parts.GetProperty(cls, (IPropertySymbol)symbol);

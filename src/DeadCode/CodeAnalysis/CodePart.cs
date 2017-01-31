@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DeadCode.CodeAnalysis
 {
@@ -9,11 +10,14 @@ namespace DeadCode.CodeAnalysis
 		{
 			Key = Guard.NotNullOrEmpty(key, nameof(key));
 			hash = Key.GetHashCode();
+			CallsTo = new HashSet<CodeMember>();
 		}
 
 		public string Key { get; }
 
 		public abstract int Count { get; }
+
+		public HashSet<CodeMember> CallsTo { get; }
 
 		public override int GetHashCode() => hash;
 		public override bool Equals(object obj) => Equals(obj as CodePart);

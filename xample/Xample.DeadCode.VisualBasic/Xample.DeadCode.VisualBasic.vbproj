@@ -50,12 +50,14 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClassWithConstructors.vb" />
     <Compile Include="EmptyClass.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
+    <Compile Include="Program.vb" />
     <Compile Include="SimpleClass.vb" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
