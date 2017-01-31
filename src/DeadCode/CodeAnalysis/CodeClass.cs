@@ -1,16 +1,23 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace DeadCode.CodeAnalysis
 {
-	public class CodeClass: CodePart
+	public class CodeClass : CodePart
 	{
 		public CodeClass(string key) : base(key)
 		{
 			Properties = new HashSet<CodeProperty>();
 			Methods = new HashSet<CodeMethod>();
 		}
+
+		public override bool IsDefined => m_IsDefined;
+		[DebuggerBrowsable(DebuggerBrowsableState.Never)]
+		private bool m_IsDefined;
+
+		public void Define() => m_IsDefined = true;
 
 		public bool Required { get; set; }
 

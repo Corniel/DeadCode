@@ -41,6 +41,7 @@ namespace DeadCode.CodeAnalysis
 		{
 			var symbol = Model.GetDeclaredSymbol(node);
 			var cls = Parts.GetClass(symbol);
+			cls.Define();
 			var nodes = node.ChildNodes().ToList();
 			//VisitConstructorDeclerations(node, cls);
 			VisitPropertyDeclarations(node, cls);
@@ -102,10 +103,7 @@ namespace DeadCode.CodeAnalysis
 
 			if (symbol?.ContainingType == null) { return; }
 
-			var cls = Parts.TryGetClass(symbol.ContainingType);
-
-			// Externally defined. We don't care.
-			if (cls == null) { return; }
+			var cls = Parts.GetClass(symbol.ContainingType);
 
 			if (symbol is IPropertySymbol)
 			{

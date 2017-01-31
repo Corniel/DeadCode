@@ -12,6 +12,8 @@ namespace DeadCode.CodeAnalysis
 
 		public CodeClass Parent { get; }
 
+		public override bool IsDefined => Parent.IsDefined;
+
 		public override int Count => CallsTo.Count;
 
 		public void AddCallTo(CodeMember call) => CallsTo.Add(call);

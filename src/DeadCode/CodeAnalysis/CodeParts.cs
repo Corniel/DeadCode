@@ -18,13 +18,7 @@ namespace DeadCode.CodeAnalysis
 
 		public IEnumerable<CodeClass> Classes => this.Where(p => p is CodeClass).Cast<CodeClass>();
 
-		public CodeClass TryGetClass(INamedTypeSymbol symbol)
-		{
-			var key = CodeClass.GetKey(symbol);
-			CodePart cls;
-			collection.TryGetValue(key, out cls);
-			return (CodeClass)cls;
-		}
+		public IEnumerable<CodeMember> DefinedMembers => this.Where(p => p.IsDefined && p is CodeMember).Cast<CodeMember>();
 
 		public CodeClass GetClass(ISymbol symbol)
 		{
@@ -73,12 +67,11 @@ namespace DeadCode.CodeAnalysis
 			CodePart selected;
 			if(collection.TryGetValue(part.Key, out selected))
 			{
-				
-				foreach(var called in selected.CallsTo)
+				collection.Remove(part.Key);
+				foreach (var called in selected.CallsTo)
 				{
 					sum += RemovePart(part);
 				}
-				collection.Remove(part.Key);
 			}
 			return sum;
 		}

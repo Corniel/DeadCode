@@ -17,6 +17,8 @@ namespace DeadCode.CodeAnalysis
 
 		public abstract int Count { get; }
 
+		public abstract bool IsDefined { get; }
+
 		public HashSet<CodeMember> CallsTo { get; }
 
 		public override int GetHashCode() => hash;
