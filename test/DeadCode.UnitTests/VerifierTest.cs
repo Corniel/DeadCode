@@ -10,7 +10,8 @@ namespace DeadCode.UnitTests
 		[Test]
 		public void Verify_XampleSln()
 		{
-			var solution = new FileInfo(@"xample\Xample.sln");
+			var root = new FileInfo(GetType().Assembly.Location).Directory;
+			var solution = new FileInfo(Path.Combine(root.FullName, @"..\..\..\..\xample\Xample.sln"));
 			var parts = new CodeParts();
 			var context = new VerifyContext(solution, parts);
 			Verifier.Verify(context);
