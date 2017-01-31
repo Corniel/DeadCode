@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace DeadCode.CodeAnalysis
 {
-	public abstract class DeadCodeWalker 
+	public abstract class DeadCodeWalker
 	{
 		protected DeadCodeWalker(CodeParts parts)
 		{
@@ -23,7 +23,7 @@ namespace DeadCode.CodeAnalysis
 		public abstract void Visit(SyntaxNode node);
 	}
 
-	public abstract class DeadCodeWalker<ClassDeclarationSyntaxType, IdentifierSyntaxType> : DeadCodeWalker 
+	public abstract class DeadCodeWalker<ClassDeclarationSyntaxType, IdentifierSyntaxType> : DeadCodeWalker
 		where ClassDeclarationSyntaxType : SyntaxNode
 		where IdentifierSyntaxType : SyntaxNode
 	{
@@ -35,14 +35,14 @@ namespace DeadCode.CodeAnalysis
 			{
 				VisitClass((ClassDeclarationSyntaxType)node);
 			}
-			
+
 		}
 		public void VisitClass(ClassDeclarationSyntaxType node)
 		{
 			var symbol = Model.GetDeclaredSymbol(node);
 			var cls = Parts.GetClass(symbol);
 			var nodes = node.ChildNodes().ToList();
-			VisitConstructorDeclerations(node, cls);
+			//VisitConstructorDeclerations(node, cls);
 			VisitPropertyDeclarations(node, cls);
 			VisitMethodDeclerations(node, cls);
 		}
@@ -52,7 +52,7 @@ namespace DeadCode.CodeAnalysis
 			{
 				var symbol = Model.GetSymbolInfo(child);
 				//var prop = Parts.GetProperty(cls, symbol);
-				//VisitImplementation(child, prop);
+				//VisitChildren(child, meth);
 			}
 		}
 		protected void VisitPropertyDeclarations(ClassDeclarationSyntaxType node, CodeClass cls)
@@ -61,7 +61,7 @@ namespace DeadCode.CodeAnalysis
 			{
 				var symbol = (IPropertySymbol)Model.GetDeclaredSymbol(child);
 				var prop = Parts.GetProperty(cls, symbol);
-				VisitImplementation(child, prop);
+				VisitChildren(child, prop);
 			}
 		}
 
@@ -71,47 +71,60 @@ namespace DeadCode.CodeAnalysis
 			{
 				var symbol = (IMethodSymbol)Model.GetDeclaredSymbol(child);
 				CodeMethod meth = Parts.GetMethod(cls, symbol);
-				VisitImplementation(child, meth);
+				VisitChildren(child , meth);
 			}
 		}
 
-		protected void VisitImplementation(SyntaxNode node, CodeMember caller)
+		private void VisitChildren(SyntaxNode root, CodeMember caller)
 		{
-			var identifier = node as IdentifierSyntaxType;
-			if(node != null)
-			{
-				var symbol = Model.GetDeclaredSymbol(node);
-				if (symbol != null)
-				{
-					var cls = Parts.TryGetClass(symbol.ContainingType);
-					
-					if (symbol is IPropertySymbol)
-					{
-						var prop = Parts.GetProperty(cls, (IPropertySymbol)symbol);
-						caller.AddCallTo(prop);
-					}
-					else if (symbol is IMethodSymbol)
-					{
-						var ms = (IMethodSymbol)symbol;
-						if(ms.MethodKind == MethodKind.PropertyGet || ms.MethodKind == MethodKind.PropertySet)
-						{
-							var prop = (IPropertySymbol)ms.AssociatedSymbol;
-							caller.AddCallTo(Parts.GetProperty(cls, prop));
-						}
-						else
-						{
-							var meth = Parts.GetMethod(cls, ms);
-							caller.AddCallTo(meth);
-						}
-					}
-				}
-			}
-			foreach(var child in node.ChildNodes())
+			foreach(var child in root.ChildNodes().Where(ch => !(ch is IdentifierSyntaxType)))
 			{
 				VisitImplementation(child, caller);
 			}
 		}
-		protected Dictionary<Type, Func<SyntaxNode, CodeMember>> nodes = new Dictionary<Type, Func<SyntaxNode, CodeMember>>();
+
+		private void VisitImplementation(SyntaxNode node, CodeMember caller)
+		{
+			var identifier = node as IdentifierSyntaxType;
+			if (identifier != null)
+			{
+				AddCallTo(identifier, caller);
+			}
+			foreach (var child in node.ChildNodes())
+			{
+				VisitImplementation(child, caller);
+			}
+		}
+
+		private void AddCallTo(IdentifierSyntaxType node, CodeMember caller)
+		{
+			var symbol = Model.GetSymbolInfo(node).Symbol;
+
+			if (symbol?.ContainingType == null) { return; }
+
+			var cls = Parts.TryGetClass(symbol.ContainingType);
+
+			if (symbol is IPropertySymbol)
+			{
+				var prop = Parts.GetProperty(cls, (IPropertySymbol)symbol);
+				caller.AddCallTo(prop);
+			}
+			else if (symbol is IMethodSymbol)
+			{
+				var ms = (IMethodSymbol)symbol;
+				if (ms.MethodKind == MethodKind.PropertyGet || ms.MethodKind == MethodKind.PropertySet)
+				{
+					var prop = (IPropertySymbol)ms.AssociatedSymbol;
+					caller.AddCallTo(Parts.GetProperty(cls, prop));
+				}
+				else
+				{
+					var meth = Parts.GetMethod(cls, ms);
+					caller.AddCallTo(meth);
+				}
+			}
+		}
+
 
 		protected abstract IEnumerable<SyntaxNode> GetConstructors(ClassDeclarationSyntaxType node);
 		protected abstract IEnumerable<SyntaxNode> GetChildProperties(ClassDeclarationSyntaxType node);
