@@ -5,7 +5,7 @@ namespace DeadCode.CodeAnalysis
 {
 	public abstract class CodeMember : CodePart
 	{
-		public CodeMember(CodeClass parent, string key) : base(key)
+		public CodeMember(CodeClass parent, string key) : base(key, key.Substring(key.LastIndexOf(':') + 1))
 		{
 			Parent = Guard.NotNull(parent, nameof(parent));
 		}

@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.MSBuild;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using CS = Microsoft.CodeAnalysis.CSharp;
@@ -19,10 +18,8 @@ namespace DeadCode.CodeAnalysis
 			using (var workspace = MSBuildWorkspace.Create())
 			{
 				var solution = workspace.OpenSolutionAsync(context.Solution.FullName).Result;
-				var dependencyGraph = solution.GetProjectDependencyGraph();
-				var projectIds = dependencyGraph.GetTopologicallySortedProjects();
 
-				foreach (var projectId in projectIds)
+				foreach (var projectId in solution.ProjectIds)
 				{
 					using (var cancel = new CancellationTokenSource())
 					{

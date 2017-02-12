@@ -6,16 +6,19 @@ namespace DeadCode.CodeAnalysis
 	public abstract class CodePart : IComparable<CodePart>, IEquatable<CodePart>
 	{
 		private readonly int hash;
-		protected CodePart(string key)
+		protected CodePart(string key, string name)
 		{
 			Key = Guard.NotNullOrEmpty(key, nameof(key));
 			hash = Key.GetHashCode();
 			CallsTo = new HashSet<CodeMember>();
+			Name = name;
 		}
 
 		public string Key { get; }
 
 		public abstract int Count { get; }
+
+		public string Name { get; }
 
 		public abstract bool IsDefined { get; }
 

@@ -16,9 +16,11 @@ namespace DeadCode.CodeAnalysis
 
 		public int Count => collection.Count;
 
-		public IEnumerable<CodeClass> Classes => this.Where(p => p is CodeClass).Cast<CodeClass>();
+		public IEnumerable<CodeClass> DefinedClasses => this.Where(p => p.IsDefined && p is CodeClass).Cast<CodeClass>();
 
 		public IEnumerable<CodeMember> DefinedMembers => this.Where(p => p.IsDefined && p is CodeMember).Cast<CodeMember>();
+
+		public IEnumerable<CodeMethod> DefinedMethods => this.Where(p => p.IsDefined && p is CodeMethod).Cast<CodeMethod>();
 
 		public CodeClass GetClass(ISymbol symbol)
 		{

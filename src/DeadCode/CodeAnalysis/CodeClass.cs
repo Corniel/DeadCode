@@ -7,7 +7,7 @@ namespace DeadCode.CodeAnalysis
 {
 	public class CodeClass : CodePart
 	{
-		public CodeClass(string key) : base(key)
+		public CodeClass(string key) : base(key, key.Substring(key.LastIndexOf('#') + 1))
 		{
 			Properties = new HashSet<CodeProperty>();
 			Methods = new HashSet<CodeMethod>();
