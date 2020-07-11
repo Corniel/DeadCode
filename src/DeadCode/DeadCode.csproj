@@ -163,13 +163,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CodeAnalysis\CodeClass.cs" />
-    <Compile Include="CodeAnalysis\CodeConstructor.cs" />
+    <Compile Include="CodeAnalysis\Class.cs" />
+    <Compile Include="CodeAnalysis\Constructor.cs" />
     <Compile Include="CodeAnalysis\CodeMember.cs" />
-    <Compile Include="CodeAnalysis\CodeMethod.cs" />
+    <Compile Include="CodeAnalysis\Method.cs" />
     <Compile Include="CodeAnalysis\CodePart.cs" />
     <Compile Include="CodeAnalysis\CodeParts.cs" />
-    <Compile Include="CodeAnalysis\CodeProperty.cs" />
+    <Compile Include="CodeAnalysis\Property.cs" />
     <Compile Include="CodeAnalysis\DeadCodeVisualBasicWalker.cs" />
     <Compile Include="CodeAnalysis\DeadCodeCSharpWalker.cs" />
     <Compile Include="CodeAnalysis\Verifier.cs" />

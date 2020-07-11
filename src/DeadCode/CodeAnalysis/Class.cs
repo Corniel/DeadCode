@@ -5,12 +5,12 @@ using System.Linq;
 
 namespace DeadCode.CodeAnalysis
 {
-	public class CodeClass : CodePart
+	public class Class : CodePart
 	{
-		public CodeClass(string key) : base(key, key.Substring(key.LastIndexOf('#') + 1))
+		public Class(string key) : base(key, key.Substring(key.LastIndexOf('#') + 1))
 		{
-			Properties = new HashSet<CodeProperty>();
-			Methods = new HashSet<CodeMethod>();
+			Properties = new HashSet<Property>();
+			Methods = new HashSet<Method>();
 		}
 
 		public override bool IsDefined => m_IsDefined;
@@ -27,13 +27,13 @@ namespace DeadCode.CodeAnalysis
 			return $"{symbol.ContainingNamespace}#{symbol.Name}";
 		}
 
-		public HashSet<CodeProperty> Properties { get; }
-		public HashSet<CodeMethod> Methods { get; }
+		public HashSet<Property> Properties { get; }
+		public HashSet<Method> Methods { get; }
 
 		public override int Count => Properties.Sum(p => p.Count) + Methods.Sum(m => m.Count);
 
-		public void Add(CodeProperty prop) => Properties.Add(prop);
-		public void Add(CodeMethod meth) => Methods.Add(meth);
+		public void Add(Property prop) => Properties.Add(prop);
+		public void Add(Method meth) => Methods.Add(meth);
 
 	}
 }

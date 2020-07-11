@@ -2,11 +2,11 @@
 
 namespace DeadCode.CodeAnalysis
 {
-	public class CodeProperty : CodeMember
+	public class Property : CodeMember
 	{
-		public CodeProperty(CodeClass parent, string key) : base(parent, key) { }
+		public Property(Class parent, string key) : base(parent, key) { }
 
-		public static string GetKey(CodeClass cls, IPropertySymbol symbol)
+		public static string GetKey(Class cls, IPropertySymbol symbol)
 		{
 			Guard.NotNull(cls, nameof(cls));
 			Guard.NotNull(symbol, nameof(symbol));

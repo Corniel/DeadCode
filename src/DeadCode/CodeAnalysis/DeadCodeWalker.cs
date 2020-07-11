@@ -46,7 +46,7 @@ namespace DeadCode.CodeAnalysis
 			VisitPropertyDeclarations(node, cls);
 			VisitMethodDeclerations(node, cls);
 		}
-		protected void VisitConstructorDeclerations(ClassDeclarationSyntaxType node, CodeClass cls)
+		protected void VisitConstructorDeclerations(ClassDeclarationSyntaxType node, Class cls)
 		{
 			foreach (var child in GetConstructors(node))
 			{
@@ -55,7 +55,7 @@ namespace DeadCode.CodeAnalysis
 				//VisitChildren(child, meth);
 			}
 		}
-		protected void VisitPropertyDeclarations(ClassDeclarationSyntaxType node, CodeClass cls)
+		protected void VisitPropertyDeclarations(ClassDeclarationSyntaxType node, Class cls)
 		{
 			foreach (var child in GetChildProperties(node))
 			{
@@ -65,12 +65,12 @@ namespace DeadCode.CodeAnalysis
 			}
 		}
 
-		protected void VisitMethodDeclerations(ClassDeclarationSyntaxType node, CodeClass cls)
+		protected void VisitMethodDeclerations(ClassDeclarationSyntaxType node, Class cls)
 		{
 			foreach (var child in GetChildMethods(node))
 			{
 				var symbol = (IMethodSymbol)Model.GetDeclaredSymbol(child);
-				CodeMethod meth = Parts.GetMethod(cls, symbol);
+				Method meth = Parts.GetMethod(cls, symbol);
 				VisitChildren(child , meth);
 			}
 		}

@@ -16,49 +16,49 @@ namespace DeadCode.CodeAnalysis
 
 		public int Count => collection.Count;
 
-		public IEnumerable<CodeClass> DefinedClasses => this.Where(p => p.IsDefined && p is CodeClass).Cast<CodeClass>();
+		public IEnumerable<Class> DefinedClasses => this.Where(p => p.IsDefined && p is Class).Cast<Class>();
 
 		public IEnumerable<CodeMember> DefinedMembers => this.Where(p => p.IsDefined && p is CodeMember).Cast<CodeMember>();
 
-		public IEnumerable<CodeMethod> DefinedMethods => this.Where(p => p.IsDefined && p is CodeMethod).Cast<CodeMethod>();
+		public IEnumerable<Method> DefinedMethods => this.Where(p => p.IsDefined && p is Method).Cast<Method>();
 
-		public CodeClass GetClass(ISymbol symbol)
+		public Class GetClass(ISymbol symbol)
 		{
-			var key = CodeClass.GetKey(symbol);
+			var key = Class.GetKey(symbol);
 
 			CodePart cls;
 			if (!collection.TryGetValue(key, out cls))
 			{
-				cls = new CodeClass(key);
+				cls = new Class(key);
 				collection[key] = cls;
 			}
-			return (CodeClass)cls;
+			return (Class)cls;
 		}
 
-		public CodeProperty GetProperty(CodeClass cls, IPropertySymbol symbol)
+		public Property GetProperty(Class cls, IPropertySymbol symbol)
 		{
-			string key = CodeProperty.GetKey(cls, symbol);
+			string key = Property.GetKey(cls, symbol);
 			CodePart prop;
 			if (!collection.TryGetValue(key, out prop))
 			{
-				prop = new CodeProperty(cls, key);
+				prop = new Property(cls, key);
 				collection[key] = prop;
-				cls.Add((CodeProperty)prop);
+				cls.Add((Property)prop);
 			}
-			return (CodeProperty)prop;
+			return (Property)prop;
 		}
 
-		public CodeMethod GetMethod(CodeClass cls, IMethodSymbol symbol)
+		public Method GetMethod(Class cls, IMethodSymbol symbol)
 		{
-			string key = CodeMethod.GetKey(cls, symbol);
+			string key = Method.GetKey(cls, symbol);
 			CodePart meth;
 			if (!collection.TryGetValue(key, out meth))
 			{
-				meth = new CodeMethod(cls, key);
+				meth = new Method(cls, key);
 				collection[key] = meth;
-				cls.Add((CodeMethod)meth);
+				cls.Add((Method)meth);
 			}
-			return (CodeMethod)meth;
+			return (Method)meth;
 		}
 
 		public int RemovePart(CodePart part)

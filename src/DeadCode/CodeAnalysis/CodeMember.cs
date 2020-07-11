@@ -5,12 +5,12 @@ namespace DeadCode.CodeAnalysis
 {
 	public abstract class CodeMember : CodePart
 	{
-		public CodeMember(CodeClass parent, string key) : base(key, key.Substring(key.LastIndexOf(':') + 1))
+		public CodeMember(Class parent, string key) : base(key, key.Substring(key.LastIndexOf(':') + 1))
 		{
 			Parent = Guard.NotNull(parent, nameof(parent));
 		}
 
-		public CodeClass Parent { get; }
+		public Class Parent { get; }
 
 		public override bool IsDefined => Parent.IsDefined;
 
