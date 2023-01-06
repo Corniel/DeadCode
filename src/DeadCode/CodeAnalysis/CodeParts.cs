@@ -8,7 +8,7 @@ using System.Linq;
 namespace DeadCode.CodeAnalysis
 {
 	[DebuggerDisplay("Count = {Count}"), DebuggerTypeProxy(typeof(CollectionDebugView<CodePart>))]
-	public class CodeParts : IEnumerable<CodePart>
+	public class CodeParts : IReadOnlyCollection<CodePart>
 	{
 		private readonly Dictionary<string, CodePart> collection = new Dictionary<string, CodePart>();
 

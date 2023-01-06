@@ -10,4 +10,8 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DeadCode\DeadCode.csproj" />
+  </ItemGroup>
+    
 </Project>

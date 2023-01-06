@@ -1,57 +1,65 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
+using System;
 using System.Collections.Immutable;
-using CS = Microsoft.CodeAnalysis.CSharp;
-using VB = Microsoft.CodeAnalysis.VisualBasic;
+using System.IO;
 
-namespace DeadCode.CodeAnalysis
+namespace DeadCode.CodeAnalysis;
+
+public abstract class DeadCodeAnalyzer : DiagnosticAnalyzer
 {
-	[DiagnosticAnalyzer(LanguageNames.CSharp, LanguageNames.VisualBasic)]
-	public class DeadCodeAnalyzer : DiagnosticAnalyzer
-	{
-		public const string DiagnosticId = "DEADCODE";
-		internal const string Title = "Dead code should be removed from the solution";
-		internal const string Description =
-			"types or members that are never executed or referenced are dead code: unnecessary, inoperative code " +
-			"that should be removed. Cleaning out dead code decreases the size of the maintained code base, " +
-			"making it easier to understand the program and preventing bugs from being introduced.";
+    public sealed override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = ImmutableArray.Create(Rule);
 
-		internal const string MessageFormat = "Code \"{0}\" is not used.";
-		internal const string Category = "Dead Code";
-		internal const DiagnosticSeverity RuleSeverity = DiagnosticSeverity.Warning;
-		internal const bool IsActivatedByDefault = true;
+    public CodeParts Parts { get; }
 
-		internal static readonly DiagnosticDescriptor Rule =
-			new DiagnosticDescriptor(DiagnosticId, Title, MessageFormat, Category,
-				RuleSeverity, IsActivatedByDefault,
-				description: Description);
-		public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => ImmutableArray.Create(Rule);
+    public DeadCodeWalker Walker { get; }
 
-		public DeadCodeAnalyzer(DeadCodeWalker walker)
-		{
-			Walker = Guard.NotNull(walker, nameof(walker));
-		}
+    protected DeadCodeAnalyzer()
+    {
+        Parts = new();
+        Walker = new DeadCodeCSharpWalker(Parts);
+    }
 
-		public static readonly CS.SyntaxKind[] CSharpKinds = new[]
-		{
-			CS.SyntaxKind.ClassDeclaration
-		};
-		public static readonly VB.SyntaxKind[] VisualBasicKinds = new[]
-		{
-			VB.SyntaxKind.ClassBlock
-		};
+    public sealed override void Initialize(AnalysisContext context)
+    {
+        context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+        context.EnableConcurrentExecution();
+        
+        context.RegisterSyntaxNodeAction(Visit, SyntaxKind.ClassDeclaration);
+        context.RegisterSyntaxNodeAction(Test, SyntaxKind.IdentifierName);
+    }
 
-		public DeadCodeWalker Walker { get; }
+    private static void Log(string message)
+    {
+        using var writer = new StreamWriter("c:/TEMP/dead-code.log", new FileStreamOptions
+        {
+            Access = FileAccess.Write,
+            Mode = FileMode.OpenOrCreate,
+            Share = FileShare.Write
+        });
+        writer.WriteLine($"{DateTime.UtcNow:HH:mm:ss}: {message}");
+    }
+private void Test(SyntaxNodeAnalysisContext context)
+    {
+        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), (context.Node as IdentifierNameSyntax)?.Identifier.Text));
+    }
 
-		public override void Initialize(AnalysisContext context)
-		{
-			context.RegisterSyntaxNodeAction(ScanCode, CSharpKinds);
-			context.RegisterSyntaxNodeAction(ScanCode, VisualBasicKinds);
-		}
-
-		private void ScanCode(SyntaxNodeAnalysisContext context)
-		{
-			Walker.Visit(context.Node, context.SemanticModel);
-		}
-	}
+    private void Visit(SyntaxNodeAnalysisContext context)
+    {
+        //Walker.Visit(context.Node);
+        Log($"Parts: {Parts?.Count}");
+    }
+   
+    protected static readonly DiagnosticDescriptor Rule = new(
+       id: "DEAD",
+       title: "Dead code should be removed from the solution",
+       messageFormat: @"Code '{0}' is not used.",
+       category: "Maintainability",
+       defaultSeverity: DiagnosticSeverity.Warning,
+       isEnabledByDefault: true,
+       description: "types or members that are never executed or referenced are dead code: unnecessary, inoperative code " +
+           "that should be removed. Cleaning out dead code decreases the size of the maintained code base, " +
+           "making it easier to understand the program and preventing bugs from being introduced.");
 }
