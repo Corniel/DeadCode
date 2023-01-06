@@ -17,8 +17,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "specs", "specs", "{860C7E9F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraryProject", "specs\LibraryProject\LibraryProject.csproj", "{89F0E885-A616-43C6-85D0-918AF540BB0A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeadCode.Analyzer", "specs\DeadCode.Analyzer\DeadCode.Analyzer.csproj", "{77B3DC21-9550-4147-8BE9-DC58348E0FF1}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,17 +31,12 @@ Global
 		{89F0E885-A616-43C6-85D0-918AF540BB0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{89F0E885-A616-43C6-85D0-918AF540BB0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{89F0E885-A616-43C6-85D0-918AF540BB0A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{77B3DC21-9550-4147-8BE9-DC58348E0FF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{77B3DC21-9550-4147-8BE9-DC58348E0FF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{77B3DC21-9550-4147-8BE9-DC58348E0FF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{77B3DC21-9550-4147-8BE9-DC58348E0FF1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{89F0E885-A616-43C6-85D0-918AF540BB0A} = {860C7E9F-5F34-4E0B-BD00-FA179D8EE319}
-		{77B3DC21-9550-4147-8BE9-DC58348E0FF1} = {860C7E9F-5F34-4E0B-BD00-FA179D8EE319}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5C8417B3-B82D-4C5A-925D-84244768F897}
