@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Immutable;
 using System.IO;
+using System.Linq;
 
 namespace DeadCode.CodeAnalysis;
 
@@ -12,46 +13,66 @@ public abstract class DeadCodeAnalyzer : DiagnosticAnalyzer
 {
     public sealed override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = ImmutableArray.Create(Rule);
 
-    public CodeParts Parts { get; }
+    private readonly CodeBase CodeBase = new();
 
-    public DeadCodeWalker Walker { get; }
+    public CodeWalker Walker { get; }
 
     protected DeadCodeAnalyzer()
     {
-        Parts = new();
-        Walker = new DeadCodeCSharpWalker(Parts);
+        Walker = new CodeWalker(CodeBase);
     }
 
     public sealed override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        
-        context.RegisterSyntaxNodeAction(Visit, SyntaxKind.ClassDeclaration);
+        context.RegisterCompilationAction(Register);
         context.RegisterSyntaxNodeAction(Test, SyntaxKind.IdentifierName);
+        context.RegisterSyntaxNodeAction(Visit, SyntaxKind.CompilationUnit);
+    }
+
+    private void Register(CompilationAnalysisContext context)
+    {
+        foreach (var tree in context.Compilation.SyntaxTrees)
+        {
+            if (tree.GetRoot().IsKind(SyntaxKind.CompilationUnit))
+            {
+
+                CodeBase.CompilationUnits[tree.GetRoot()] = false;
+            }
+        }
     }
 
     private static void Log(string message)
     {
-        using var writer = new StreamWriter("c:/TEMP/dead-code.log", new FileStreamOptions
+        lock (locker)
         {
-            Access = FileAccess.Write,
-            Mode = FileMode.OpenOrCreate,
-            Share = FileShare.Write
-        });
-        writer.WriteLine($"{DateTime.UtcNow:HH:mm:ss}: {message}");
+            using var writer = new StreamWriter("c:/TEMP/dead-code.log", true);
+            writer.WriteLine(message);
+        }
     }
-private void Test(SyntaxNodeAnalysisContext context)
+    private static readonly object locker = new();
+
+    private void Test(SyntaxNodeAnalysisContext context)
     {
-        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), (context.Node as IdentifierNameSyntax)?.Identifier.Text));
+        var name = (context.Node as IdentifierNameSyntax)?.Identifier.Text;
+        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), name));
     }
 
     private void Visit(SyntaxNodeAnalysisContext context)
     {
-        //Walker.Visit(context.Node);
-        Log($"Parts: {Parts?.Count}");
+        Walker.Visit(context.Node, context.SemanticModel);
+
+        CodeBase.CompilationUnits[context.Node] = true;
+
+        Log(CodeBase.CompilationUnits.Count.ToString());
+
+        if (CodeBase.Code.All(c => c.Identifier.HasValue))
+        {
+            Log(string.Join("\n", CodeBase.Symbols));
+        }
     }
-   
+
     protected static readonly DiagnosticDescriptor Rule = new(
        id: "DEAD",
        title: "Dead code should be removed from the solution",

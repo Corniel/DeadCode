@@ -2,4 +2,8 @@
 
 internal class InternalClass
 {
+    public InternalClass()
+    {
+
+    }
 }

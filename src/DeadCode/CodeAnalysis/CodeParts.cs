@@ -48,7 +48,21 @@ namespace DeadCode.CodeAnalysis
 			return (Property)prop;
 		}
 
-		public Method GetMethod(Class cls, IMethodSymbol symbol)
+        public Property GetProperty(IPropertySymbol symbol)
+        {
+            var cls = GetClass(symbol.ContainingType);
+            string key = Property.GetKey(cls, symbol);
+
+            if (!collection.TryGetValue(key, out var prop))
+            {
+                prop = new Property(cls, key);
+                collection[key] = prop;
+                cls.Add((Property)prop);
+            }
+            return (Property)prop;
+        }
+
+        public Method GetMethod(Class cls, IMethodSymbol symbol)
 		{
 			string key = Method.GetKey(cls, symbol);
 			CodePart meth;
@@ -61,7 +75,23 @@ namespace DeadCode.CodeAnalysis
 			return (Method)meth;
 		}
 
-		public int RemovePart(CodePart part)
+        public Method GetMethod(IMethodSymbol symbol)
+        {
+			var cls = GetClass(symbol.ContainingType);
+            string key = Method.GetKey(cls, symbol);
+
+			if (!collection.TryGetValue(key, out var meth))
+            {
+                meth = new Method(cls, key);
+                collection[key] = meth;
+                cls.Add((Method)meth);
+            }
+            return (Method)meth;
+        }
+
+
+
+        public int RemovePart(CodePart part)
 		{
 			Guard.NotNull(part, nameof(part));
 			var sum = 0;
