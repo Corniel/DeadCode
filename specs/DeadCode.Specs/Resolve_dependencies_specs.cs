@@ -1,4 +1,6 @@
 using CodeAnalysis.TestTools;
+using FluentAssertions;
+using Specs;
 using Specs.Analyzers;
 
 namespace Resolve_dependencies_specs;
@@ -14,7 +16,19 @@ public class Test
             .AddSource("Snippets/LibraryProject.cs")
             .WithLanguageVersion(LanguageVersion.CSharp11)
             .ReportIssues();
-        
 
+        analyzer.CodeBase.Should().HaveDepedencies(new Dictionary<Symbol, Symbol[]>()
+        {
+            ["LibraryProject.SomeClass"] = Array.Empty<Symbol>(),
+            ["LibraryProject.SomeClass.SomeClass(string)"] = new Symbol[] { "LibraryProject.SomeClass" },
+            ["LibraryProject.SomeClass.Name"] = new Symbol[] { "string" },
+            ["LibraryProject.SomeClass.BegToDiffer(LibraryProject.OtherClass)"] = new Symbol[] { "LibraryProject.SomeClass", "bool", "LibraryProject.OtherClass" },
+            ["LibraryProject.SomeClass.WithContent()"] = new Symbol[] { "System.Console", "bool", "LibraryProject.SomeStruct.SomeStruct()" },
+
+            ["LibraryProject.OtherClass"] = Array.Empty<Symbol>(),
+
+            ["LibraryProject.SomeStruct"] = Array.Empty<Symbol>(),
+            ["LibraryProject.SomeStruct.Value"] = new Symbol[] { "LibraryProject.SomeStruct", "int" },
+        });
     }
 }
