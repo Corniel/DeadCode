@@ -31,7 +31,21 @@ public abstract class DeadCodeAnalyzer : DiagnosticAnalyzer
         {
             DepedencyResolver.Resolve(tree.GetRoot(), context.Compilation.GetSemanticModel(tree));
         }
+        foreach (var code in CodeBase.Code.Where(c => c.Node is { } && !c.Used))
+        {
+            context.ReportDiagnostic(Diagnostic.Create(Rule, Location(code.Node!)));
+        }
     }
+    private static Location Location(SyntaxNode node) => node switch
+    {
+        ClassDeclarationSyntax x => x.Identifier.GetLocation(),
+        StructDeclarationSyntax x => x.Identifier.GetLocation(),
+        ConstructorDeclarationSyntax x => x.Identifier.GetLocation(),
+        PropertyDeclarationSyntax x => x.Identifier.GetLocation(),
+        MethodDeclarationSyntax x => x.Identifier.GetLocation(),
+        _ => node.GetLocation(),
+    };
+
 
     private static void Log(string message)
     {
@@ -66,7 +80,7 @@ public abstract class DeadCodeAnalyzer : DiagnosticAnalyzer
     protected static readonly DiagnosticDescriptor Rule = new(
        id: "DEAD",
        title: "Dead code should be removed from the solution",
-       messageFormat: @"Code '{0}' is not used.",
+       messageFormat: @"Code is not used.",
        category: "Maintainability",
        defaultSeverity: DiagnosticSeverity.Warning,
        isEnabledByDefault: true,
