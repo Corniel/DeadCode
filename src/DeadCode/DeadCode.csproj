@@ -7,25 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="CodeAnalysis\Class.cs" />
-    <Compile Remove="CodeAnalysis\CodeMember.cs" />
-    <Compile Remove="CodeAnalysis\CodePart.cs" />
-    <Compile Remove="CodeAnalysis\CodeParts.cs" />
-    <Compile Remove="CodeAnalysis\Constructor.cs" />
-    <Compile Remove="CodeAnalysis\DeadCodeCSharpWalker.cs" />
-    <Compile Remove="CodeAnalysis\DeadCodeVisualBasicWalker.cs" />
-    <Compile Remove="CodeAnalysis\DeadCodeWalker.cs" />
-    <Compile Remove="CodeAnalysis\Method.cs" />
-    <Compile Remove="CodeAnalysis\Property.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="3.*" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.*" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="CodeAnalysis\" />
   </ItemGroup>
 
 </Project>
