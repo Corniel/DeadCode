@@ -1,11 +1,4 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Diagnostics;
-using System;
-using System.Collections.Immutable;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 
 namespace DeadCode.CodeAnalysis;
 
@@ -13,33 +6,30 @@ public abstract class DeadCodeAnalyzer : DiagnosticAnalyzer
 {
     public sealed override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } = ImmutableArray.Create(Rule);
 
-    private readonly CodeBase CodeBase = new();
+    public CodeBase CodeBase => DepedencyResolver.CodeBase;
+    private DepedencyResolver DepedencyResolver { get; }
 
-    public CodeWalker Walker { get; }
-
-    protected DeadCodeAnalyzer()
+    protected DeadCodeAnalyzer() : this(new CodeBase()) { }
+    protected DeadCodeAnalyzer(CodeBase codeBase) : this(new DepedencyResolver(codeBase)) { }
+    protected DeadCodeAnalyzer(DepedencyResolver? depedencyResolver)
     {
-        Walker = new CodeWalker(CodeBase);
+        DepedencyResolver = depedencyResolver ?? new DepedencyResolver(CodeBase);
     }
 
     public sealed override void Initialize(AnalysisContext context)
     {
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
-        context.RegisterCompilationAction(Register);
-        context.RegisterSyntaxNodeAction(Test, SyntaxKind.IdentifierName);
-        context.RegisterSyntaxNodeAction(Visit, SyntaxKind.CompilationUnit);
+        context.RegisterCompilationAction(Analyze);
+        //context.RegisterSyntaxNodeAction(Test, SyntaxKind.IdentifierName);
+        //context.RegisterSyntaxNodeAction(Visit, SyntaxKind.CompilationUnit);
     }
 
-    private void Register(CompilationAnalysisContext context)
+    private void Analyze(CompilationAnalysisContext context)
     {
         foreach (var tree in context.Compilation.SyntaxTrees)
         {
-            if (tree.GetRoot().IsKind(SyntaxKind.CompilationUnit))
-            {
-
-                CodeBase.CompilationUnits[tree.GetRoot()] = false;
-            }
+            DepedencyResolver.Resolve(tree.GetRoot(), context.Compilation.GetSemanticModel(tree));
         }
     }
 
@@ -53,25 +43,25 @@ public abstract class DeadCodeAnalyzer : DiagnosticAnalyzer
     }
     private static readonly object locker = new();
 
-    private void Test(SyntaxNodeAnalysisContext context)
-    {
-        var name = (context.Node as IdentifierNameSyntax)?.Identifier.Text;
-        context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), name));
-    }
+    //private void Test(SyntaxNodeAnalysisContext context)
+    //{
+    //    var name = (context.Node as IdentifierNameSyntax)?.Identifier.Text;
+    //    context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), name));
+    //}
 
-    private void Visit(SyntaxNodeAnalysisContext context)
-    {
-        Walker.Visit(context.Node, context.SemanticModel);
+    //private void Visit(SyntaxNodeAnalysisContext context)
+    //{
+    //    DepedencyResolver.Visit(context.Node, context.SemanticModel);
 
-        CodeBase.CompilationUnits[context.Node] = true;
+    //    CodeBase.CompilationUnits[context.Node] = true;
 
-        Log(CodeBase.CompilationUnits.Count.ToString());
+    //    Log(CodeBase.CompilationUnits.Count.ToString());
 
-        if (CodeBase.Code.All(c => c.Identifier.HasValue))
-        {
-            Log(string.Join("\n", CodeBase.Symbols));
-        }
-    }
+    //    if (CodeBase.Code.All(c => c.Node is { }))
+    //    {
+    //        Log(string.Join("\n", CodeBase.Symbols));
+    //    }
+    //}
 
     protected static readonly DiagnosticDescriptor Rule = new(
        id: "DEAD",

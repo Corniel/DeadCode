@@ -1,9 +1,10 @@
-﻿using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace DeadCode;
 
-public class Code
+[DebuggerDisplay("{Symbol}, References: {References.Count}")]
+public sealed class Code
 {
     public Code(ISymbol symbol, params ISymbol[] references)
     {
@@ -11,9 +12,9 @@ public class Code
         References = new HashSet<ISymbol>(references, SymbolEqualityComparer.Default);
     }
 
-    public bool Used { get; internal set; }
+    public bool Used { get; private set; }
 
-    public SyntaxToken? Identifier { get; internal set; }
+    public SyntaxNode? Node { get; internal set; }
 
     public ISymbol Symbol { get; }
 

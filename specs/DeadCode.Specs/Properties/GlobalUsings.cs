@@ -1,0 +1,10 @@
+global using NUnit.Framework;
+global using DeadCode.CodeAnalysis;
+global using Microsoft.CodeAnalysis;
+global using Microsoft.CodeAnalysis.Diagnostics;
+global using System;
+global using System.Collections.Generic;
+global using System.Linq;
+global using System.Text;
+global using System.Threading.Tasks;
+global using Microsoft.CodeAnalysis.CSharp;
