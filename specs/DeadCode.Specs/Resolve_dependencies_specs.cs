@@ -1,4 +1,5 @@
 using CodeAnalysis.TestTools;
+using DeadCode;
 using FluentAssertions;
 using Specs;
 using Specs.Analyzers;
@@ -30,5 +31,20 @@ public class Test
             ["LibraryProject.SomeStruct"] = Array.Empty<Symbol>(),
             ["LibraryProject.SomeStruct.Value"] = new Symbol[] { "LibraryProject.SomeStruct", "int" },
         });
+    }
+}
+
+static class Dependencies
+{
+    public static CodeBase Resolve(string snippet)
+    {
+        var analyzer = new DefaultAnalyzer();
+
+        _ = analyzer.ForCS()
+            .AddSnippet(snippet)
+            .WithLanguageVersion(LanguageVersion.CSharp11)
+            .ReportIssues();
+
+        return analyzer.CodeBase;
     }
 }

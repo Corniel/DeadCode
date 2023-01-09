@@ -21,7 +21,6 @@ public abstract class DeadCodeAnalyzer : DiagnosticAnalyzer
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterCompilationAction(Analyze);
-        //context.RegisterSyntaxNodeAction(Test, SyntaxKind.IdentifierName);
         //context.RegisterSyntaxNodeAction(Visit, SyntaxKind.CompilationUnit);
     }
 
@@ -80,7 +79,7 @@ public abstract class DeadCodeAnalyzer : DiagnosticAnalyzer
     protected static readonly DiagnosticDescriptor Rule = new(
        id: "DEAD",
        title: "Dead code should be removed from the solution",
-       messageFormat: @"Code is not used.",
+       messageFormat: "Remove this unused code.",
        category: "Maintainability",
        defaultSeverity: DiagnosticSeverity.Warning,
        isEnabledByDefault: true,

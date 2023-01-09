@@ -61,6 +61,7 @@ public class DepedencyResolver : CSharpSyntaxWalker
         }
         base.VisitPropertyDeclaration(node);
     }
+
     public override void VisitIdentifierName(IdentifierNameSyntax node)
     {
         if (CodeBase.Parent(node) is { } parent

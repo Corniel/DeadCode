@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace DeadCode;
 
 public sealed class CodeBase
 {
-    private readonly Dictionary<ISymbol, Code> lookup = new Dictionary<ISymbol, Code>(SymbolEqualityComparer.Default);
+    private readonly Dictionary<ISymbol, Code> lookup = new(SymbolEqualityComparer.Default);
     private readonly Dictionary<SyntaxNode, Code> nodes = new();
     private readonly object locker = new();
 
