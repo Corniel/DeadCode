@@ -84,8 +84,10 @@ public class DepedencyResolver : CSharpSyntaxWalker
 
     public override void VisitIdentifierName(IdentifierNameSyntax node)
     {
-        if (CodeBase.Parent(node) is { } parent
-            && Model.GetSymbolInfo(node).Symbol is { } symbol)
+        var name = node.Parent is ObjectCreationExpressionSyntax create ? (SyntaxNode)create : node;
+
+        if (CodeBase.Parent(name) is { } parent
+            && Model.GetSymbolInfo(name).Symbol is { } symbol)
         {
             parent.References.Add(symbol);
         }

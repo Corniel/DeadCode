@@ -45,14 +45,12 @@ public class Test
         {
             ["LibraryProject.SomeClass"] = Symbol.Refs(),
             ["LibraryProject.SomeClass.SomeClass(string)"] = Symbol.Refs("LibraryProject.SomeClass"),
-            ["LibraryProject.SomeClass.Name"] = Symbol.Refs(),
-            ["LibraryProject.SomeClass.BegToDiffer(LibraryProject.OtherClass)"] = Symbol.Refs("LibraryProject.SomeClass", "bool", "LibraryProject.OtherClass"),
-            ["LibraryProject.SomeClass.WithContent()"] = Symbol.Refs("System.Console", "bool", "LibraryProject.SomeStruct.SomeStruct()"),
+            ["LibraryProject.SomeClass.Name"] = Symbol.Refs("LibraryProject.SomeClass"),
+            ["LibraryProject.SomeClass.BegToDiffer(LibraryProject.OtherClass)"] = Symbol.Refs("LibraryProject.SomeClass", "LibraryProject.OtherClass"),
+            ["LibraryProject.SomeClass.WithContent()"] = Symbol.Refs("LibraryProject.SomeClass", "LibraryProject.SomeStruct.SomeStruct()"),
 
             ["LibraryProject.OtherClass"] = Symbol.Refs(),
-
             ["LibraryProject.SomeStruct"] = Symbol.Refs(),
-            ["LibraryProject.SomeStruct.Value"] = new Symbol[] { "LibraryProject.SomeStruct", "int" },
         });
     }
 }

@@ -10,7 +10,7 @@ public static class DeadCodeSymbolExtensions
         IMethodSymbol x => x.ContainingAssembly.HasSource(),
         IFieldSymbol x => x.ContainingAssembly.HasSource(),
         IAssemblySymbol x => x.HasSource(),
-        _ => true,
+        _ => false,
     };
 
     private static bool HasSource(this IAssemblySymbol assembly) => assembly.GetType().Name != "NonSourceAssemblySymbol";

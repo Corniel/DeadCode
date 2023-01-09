@@ -1,9 +1,12 @@
-﻿namespace DeadCode;
+﻿using System.Diagnostics;
+
+namespace DeadCode;
 
 [DebuggerDisplay("Count = {Count}")]
-[DebuggerVisualizer(typeof(Diagnostics.CollectionDebugView))]
+[DebuggerTypeProxy(typeof(Diagnostics.CollectionDebugView))]
 public sealed class References : IReadOnlyCollection<ISymbol>
 {
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private readonly HashSet<ISymbol> Set = new(SymbolEqualityComparer.Default);
 
     /// <inheritdoc />
