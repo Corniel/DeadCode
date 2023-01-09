@@ -26,6 +26,15 @@ public class DepedencyResolver : CSharpSyntaxWalker
         base.VisitClassDeclaration(node);
     }
 
+    public override void VisitStructDeclaration(StructDeclarationSyntax node)
+    {
+        if (Model.GetDeclaredSymbol(node) is { } type)
+        {
+            CodeBase.SetNode(type, node);
+        }
+        base.VisitStructDeclaration(node);
+    }
+
     public override void VisitRecordDeclaration(RecordDeclarationSyntax node)
     {
         if (Model.GetDeclaredSymbol(node) is { } type)
@@ -39,7 +48,18 @@ public class DepedencyResolver : CSharpSyntaxWalker
     {
         if (Model.GetDeclaredSymbol(node) is { } ctor)
         {
-            CodeBase.SetNode(ctor, node);
+            var code = CodeBase.SetNode(ctor, node);
+
+            if (node.Initializer is { } initializer && Model.GetSymbolInfo(initializer).Symbol is { } init)
+            {
+                code.References.Add(init);
+            }
+
+            // default ctor.
+            if (!ctor.Parameters.Any())
+            {
+                CodeBase.GetOrCreate(ctor.ContainingType).References.Add(ctor);
+            }
         }
     }
 

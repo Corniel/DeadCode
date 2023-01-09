@@ -6,4 +6,6 @@ internal class InternalClass
     {
 
     }
+
+    public InternalClass(int val) : this() { }
 }

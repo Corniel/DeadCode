@@ -1,12 +1,17 @@
-﻿using System.Collections.Generic;
-
-namespace DeadCode;
+﻿namespace DeadCode;
 
 public sealed class CodeBase
 {
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private readonly Dictionary<ISymbol, Code> lookup = new(SymbolEqualityComparer.Default);
+    
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private readonly Dictionary<SyntaxNode, Code> nodes = new();
+
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private readonly object locker = new();
+
+    public Code this[ISymbol symbol] => lookup[symbol];
 
     public Code GetOrCreate(ISymbol symbol)
     {
@@ -21,6 +26,7 @@ public sealed class CodeBase
         }
     }
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     public IReadOnlyCollection<ISymbol> Symbols => lookup.Keys;
 
     public IReadOnlyCollection<Code> Code => lookup.Values;

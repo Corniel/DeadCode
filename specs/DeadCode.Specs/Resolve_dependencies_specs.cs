@@ -9,6 +9,29 @@ namespace Resolve_dependencies_specs;
 public class Test
 {
     [Test]
+    public void ctor_depends_on_base()
+    {
+        var analyzer = new DefaultAnalyzer();
+
+        _ = analyzer.ForCS()
+        .AddSnippet(@"
+            
+    public class MyClass
+    {
+        public MyClass() { }
+        public MyClass(MyClass other) : this(){ }
+    }")
+        .ReportIssues();
+
+        analyzer.CodeBase.Should().HaveDepedencies(new Dictionary<Symbol, Symbol[]>()
+        {
+            ["MyClass"] = Symbol.Refs("MyClass.MyClass()"),
+            ["MyClass.MyClass()"] = Symbol.Refs("MyClass"),
+            ["MyClass.MyClass(MyClass)"] = Symbol.Refs("MyClass", "MyClass.MyClass()"),
+        });
+    }
+
+    [Test]
     public void Resolve()
     {
         var analyzer = new DefaultAnalyzer();
@@ -20,15 +43,15 @@ public class Test
 
         analyzer.CodeBase.Should().HaveDepedencies(new Dictionary<Symbol, Symbol[]>()
         {
-            ["LibraryProject.SomeClass"] = Array.Empty<Symbol>(),
-            ["LibraryProject.SomeClass.SomeClass(string)"] = new Symbol[] { "LibraryProject.SomeClass" },
-            ["LibraryProject.SomeClass.Name"] = new Symbol[] { "string" },
-            ["LibraryProject.SomeClass.BegToDiffer(LibraryProject.OtherClass)"] = new Symbol[] { "LibraryProject.SomeClass", "bool", "LibraryProject.OtherClass" },
-            ["LibraryProject.SomeClass.WithContent()"] = new Symbol[] { "System.Console", "bool", "LibraryProject.SomeStruct.SomeStruct()" },
+            ["LibraryProject.SomeClass"] = Symbol.Refs(),
+            ["LibraryProject.SomeClass.SomeClass(string)"] = Symbol.Refs("LibraryProject.SomeClass"),
+            ["LibraryProject.SomeClass.Name"] = Symbol.Refs(),
+            ["LibraryProject.SomeClass.BegToDiffer(LibraryProject.OtherClass)"] = Symbol.Refs("LibraryProject.SomeClass", "bool", "LibraryProject.OtherClass"),
+            ["LibraryProject.SomeClass.WithContent()"] = Symbol.Refs("System.Console", "bool", "LibraryProject.SomeStruct.SomeStruct()"),
 
-            ["LibraryProject.OtherClass"] = Array.Empty<Symbol>(),
+            ["LibraryProject.OtherClass"] = Symbol.Refs(),
 
-            ["LibraryProject.SomeStruct"] = Array.Empty<Symbol>(),
+            ["LibraryProject.SomeStruct"] = Symbol.Refs(),
             ["LibraryProject.SomeStruct.Value"] = new Symbol[] { "LibraryProject.SomeStruct", "int" },
         });
     }
