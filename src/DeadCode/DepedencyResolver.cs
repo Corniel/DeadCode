@@ -1,4 +1,7 @@
-﻿namespace DeadCode;
+﻿using DeadCode.Syntax;
+using System.Xml.Linq;
+
+namespace DeadCode;
 
 public class DepedencyResolver : CSharpSyntaxWalker
 {
@@ -92,5 +95,16 @@ public class DepedencyResolver : CSharpSyntaxWalker
             parent.References.Add(symbol);
         }
         base.VisitIdentifierName(node);
+    }
+
+    public override void VisitAttribute(AttributeSyntax node)
+    {
+        if(CodeBase.Parent(node) is { } parent 
+            && Model.GetDeclaredSymbol(node) is { } attr
+            && attr.ContainingType.Is(SystemType.System_ObsoleteAttribute))
+        {
+            parent.Ignore = true;
+        }
+        base.VisitAttribute(node);
     }
 }

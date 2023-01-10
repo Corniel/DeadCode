@@ -15,5 +15,7 @@ public sealed class Code
     public ISymbol Symbol { get; }
 
     public References References { get; } = new();
+
+    public bool Ignore { get; internal set; }
 }
 

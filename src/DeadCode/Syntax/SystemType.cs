@@ -26,5 +26,6 @@ public sealed partial class SystemType
 
     /// <summary>Casts a <see cref="System.Type"/> to a <see cref="SystemType"/>.</summary>
     public static implicit operator SystemType(Type type) => new SystemType(type.FullName, default);
+    
     private static SystemType New(Type type, SpecialType specialType) => new SystemType(type.FullName, specialType);
 }

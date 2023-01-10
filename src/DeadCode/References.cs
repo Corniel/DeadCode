@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace DeadCode;
+﻿namespace DeadCode;
 
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Diagnostics.CollectionDebugView))]
