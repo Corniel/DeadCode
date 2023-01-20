@@ -1,9 +1,9 @@
 ﻿using DeadCode.CodeAnalysis;
 
-namespace DeadCode
+namespace DeadCode;
+
+[DiagnosticAnalyzer(LanguageNames.CSharp)]
+public class MyDeadCodeAnalyzer : DeadCodeAnalyzer
 {
-    [DiagnosticAnalyzer(LanguageNames.CSharp)]
-    public class MyDeadCodeAnalyzer : DeadCodeAnalyzer
-    {
-    }
+
 }

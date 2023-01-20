@@ -1,5 +1,4 @@
 ﻿using DeadCode.Syntax;
-using System.Xml.Linq;
 
 namespace DeadCode;
 
@@ -90,7 +89,7 @@ public class DepedencyResolver : CSharpSyntaxWalker
         var name = node.Parent is ObjectCreationExpressionSyntax create ? (SyntaxNode)create : node;
 
         if (CodeBase.Parent(name) is { } parent
-            && Model.GetSymbolInfo(name).Symbol is { } symbol)
+            && Model!.GetSymbolInfo(name).Symbol is { } symbol)
         {
             parent.References.Add(symbol);
         }
