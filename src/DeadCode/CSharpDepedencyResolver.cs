@@ -1,18 +1,16 @@
-﻿using DeadCode.Syntax;
-
-namespace DeadCode;
+﻿namespace DeadCode;
 
 internal sealed class CSharpDepedencyResolver : CSharpSyntaxWalker
 {
-    public CSharpDepedencyResolver(CodeBase codeBase, SemanticModel model)
+    public CSharpDepedencyResolver(DepedencyResolver resolver, SemanticModel model)
     {
-        CodeBase = codeBase;
+        Resolver = resolver;
         Model = model;
     }
 
-    public CodeBase CodeBase { get; }
-
-    public SemanticModel Model { get; }
+    private readonly DepedencyResolver Resolver;
+    private readonly SemanticModel Model;
+    private CodeBase CodeBase => Resolver.CodeBase;
 
     public override void VisitClassDeclaration(ClassDeclarationSyntax node)
     {
@@ -49,13 +47,13 @@ internal sealed class CSharpDepedencyResolver : CSharpSyntaxWalker
 
             if (node.Initializer is { } initializer && Model.GetSymbolInfo(initializer).Symbol is { } init)
             {
-                code.References.Add(init);
+                CodeBase.GetOrCreate(init)?.UsedBy.Add(code);
             }
 
             // default ctor.
             if (!ctor.Parameters.Any())
             {
-                CodeBase.GetOrCreate(ctor.ContainingType).References.Add(ctor);
+                CodeBase.GetOrCreate(ctor)!.UsedBy.Add(CodeBase.GetOrCreate(ctor.ContainingType));
             }
         }
     }
@@ -64,11 +62,11 @@ internal sealed class CSharpDepedencyResolver : CSharpSyntaxWalker
     {
         if (Model.GetDeclaredSymbol(node) is { } method)
         {
-            CodeBase.SetNode(method, node);
+            var code = CodeBase.SetNode(method, node);
+            code.IsEntryPoint = Resolver.IsEntryPoint(method);
         }
         base.VisitMethodDeclaration(node);
     }
-
 
     public override void VisitPropertyDeclaration(PropertyDeclarationSyntax node)
     {
@@ -86,20 +84,9 @@ internal sealed class CSharpDepedencyResolver : CSharpSyntaxWalker
         if (CodeBase.Parent(name) is { } parent
             && Model!.GetSymbolInfo(name).Symbol is { } symbol)
         {
-            parent.References.Add(symbol);
+            CodeBase.GetOrCreate(symbol)?.UsedBy.Add(parent);
         }
         base.VisitIdentifierName(node);
-    }
-
-    public override void VisitAttribute(AttributeSyntax node)
-    {
-        if (CodeBase.Parent(node) is { } parent
-            && Model.GetDeclaredSymbol(node) is { } attr
-            && attr.ContainingType.Is(SystemType.System_ObsoleteAttribute))
-        {
-            parent.Ignore = true;
-        }
-        base.VisitAttribute(node);
     }
 }
 

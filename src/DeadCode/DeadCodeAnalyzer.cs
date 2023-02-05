@@ -21,19 +21,13 @@ public abstract class DeadCodeAnalyzer : DiagnosticAnalyzer
         context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
         context.EnableConcurrentExecution();
         context.RegisterCompilationAction(Analyze);
-        //context.RegisterSyntaxNodeAction(Visit, SyntaxKind.CompilationUnit);
+        context.RegisterSyntaxNodeAction(Visit, SyntaxKind.CompilationUnit);
     }
 
     private void Analyze(CompilationAnalysisContext context)
     {
-        foreach (var tree in context.Compilation.SyntaxTrees)
-        {
-            DepedencyResolver.Resolve(tree.GetRoot(), context.Compilation.GetSemanticModel(tree));
-        }
-        foreach (var code in CodeBase.Code.Where(c => c.Node is { } && !c.Used))
-        {
-            context.ReportDiagnostic(Diagnostic.Create(Rule, Location(code.Node!)));
-        }
+        // foreach (var tree in context.Compilation.SyntaxTrees)
+        // DepedencyResolver.Resolve(tree.GetRoot(), context.Compilation.GetSemanticModel(tree))
     }
     private static Location Location(SyntaxNode node) => node switch
     {
@@ -56,25 +50,20 @@ public abstract class DeadCodeAnalyzer : DiagnosticAnalyzer
     }
     private static readonly object locker = new();
 
-    //private void Test(SyntaxNodeAnalysisContext context)
-    //{
-    //    var name = (context.Node as IdentifierNameSyntax)?.Identifier.Text;
-    //    context.ReportDiagnostic(Diagnostic.Create(Rule, context.Node.GetLocation(), name));
-    //}
+    private void Visit(SyntaxNodeAnalysisContext context)
+    {
+        DepedencyResolver.Resolve(context.Node, context.SemanticModel);
 
-    //private void Visit(SyntaxNodeAnalysisContext context)
-    //{
-    //    DepedencyResolver.Visit(context.Node, context.SemanticModel);
+        if (CodeBase.FullyResolved)
+        {
+            Log(string.Join("\n", CodeBase.Symbols));
 
-    //    CodeBase.CompilationUnits[context.Node] = true;
-
-    //    Log(CodeBase.CompilationUnits.Count.ToString());
-
-    //    if (CodeBase.Code.All(c => c.Node is { }))
-    //    {
-    //        Log(string.Join("\n", CodeBase.Symbols));
-    //    }
-    //}
+            foreach (var code in CodeBase.Code.Where(c => c.Node is { } && c.IsDead))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(Rule, Location(code.Node!)));
+            }
+        }
+    }
 
     protected static readonly DiagnosticDescriptor Rule = new(
        id: "DEAD",

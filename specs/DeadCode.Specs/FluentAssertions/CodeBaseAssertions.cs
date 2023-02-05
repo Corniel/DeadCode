@@ -1,6 +1,6 @@
 ﻿using DeadCode;
 using FluentAssertions.Execution;
-using Specs;
+using Specs.Tooling;
 
 namespace FluentAssertions;
 
@@ -13,7 +13,7 @@ public sealed class CodeBaseAssertions
 
     public CodeBase Subject { get; }
 
-    public AndConstraint<CodeBaseAssertions> HaveDepedencies(Dictionary<Symbol, Symbol[]> depedencies)
+    public AndConstraint<CodeBaseAssertions> HaveUsedBys(Dictionary<Symbol, Symbol[]> depedencies)
     {
         var issues = 0;
         var report = new StringBuilder();
@@ -24,8 +24,8 @@ public sealed class CodeBaseAssertions
             {
                 var code = Subject[symbol];
 
-                var missing = kvp.Value.Where(s => !code.References.Any(r => s.Equals(r))).ToList();
-                var extra = code.References.Where(r => !kvp.Value.Any(s => s.Equals(r))).ToList();
+                var missing = kvp.Value.Where(s => !code.UsedBy.Any(r => s.Equals(r.Symbol))).ToList();
+                var extra = code.UsedBy.Where(r => !kvp.Value.Any(s => s.Equals(r.Symbol))).Select(c => c.Symbol).ToList();
 
                 if (missing.Any() || extra.Any())
                 {
@@ -46,7 +46,7 @@ public sealed class CodeBaseAssertions
                 issues++;
             }
         }
-        foreach(var code in Subject.Code)
+        foreach (var code in Subject.Code)
         {
             if (!depedencies.Keys.Any(s => s.Equals(code.Symbol)))
             {

@@ -4,7 +4,7 @@ public sealed class CodeBase
 {
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private readonly Dictionary<ISymbol, Code> lookup = new(SymbolEqualityComparer.Default);
-    
+
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private readonly Dictionary<SyntaxNode, Code> nodes = new();
 
@@ -13,17 +13,21 @@ public sealed class CodeBase
 
     public Code this[ISymbol symbol] => lookup[symbol];
 
-    public Code GetOrCreate(ISymbol symbol)
+    public Code? GetOrCreate(ISymbol symbol)
     {
-        lock (locker)
+        if (symbol.HasSource())
         {
-            if (!lookup.TryGetValue(symbol, out var code))
+            lock (locker)
             {
-                code = new(symbol);
-                lookup[symbol] = code;
+                if (!lookup.TryGetValue(symbol, out var code))
+                {
+                    code = new(symbol);
+                    lookup[symbol] = code;
+                }
+                return code;
             }
-            return code;
         }
+        else { return null; }
     }
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -31,7 +35,7 @@ public sealed class CodeBase
 
     public IReadOnlyCollection<Code> Code => lookup.Values;
 
-    public Dictionary<SyntaxNode, bool> CompilationUnits { get; } = new Dictionary<SyntaxNode, bool>();
+    public bool FullyResolved => Code.All(c => c.Node is { });
 
     public Code? Parent(SyntaxNode node)
     {
@@ -50,24 +54,25 @@ public sealed class CodeBase
     public Code SetNode(IMethodSymbol method, SyntaxNode node)
     {
         var code = GetOrCreate(method);
-        code.Node = node;
+        code!.Node = node;
         nodes[node] = code;
-        code.References.Add(method.ContainingType);
-        code.References.Add(method.ReturnType);
-        foreach(var type in method.TypeArguments)
+        GetOrCreate(method.ContainingType)!.UsedBy.Add(code);
+        GetOrCreate(method.ReturnType)?.UsedBy.Add(code);
+
+        foreach (var type in method.TypeArguments)
         {
-            code.References.Add(type);
+            GetOrCreate(type)!.UsedBy.Add(code);
         }
         return code;
     }
 
     public Code SetNode(IPropertySymbol prop, SyntaxNode node)
     {
-        var code = GetOrCreate(prop);
+        var code = GetOrCreate(prop)!;
         code.Node = node;
         nodes[node] = code;
-        code.References.Add(prop.ContainingType);
-        code.References.Add(prop.Type);
+        GetOrCreate(prop.ContainingType)!.UsedBy?.Add(code);
+        GetOrCreate(prop.Type)?.UsedBy?.Add(code);
         return code;
     }
 }

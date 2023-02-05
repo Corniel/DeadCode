@@ -2,22 +2,22 @@
 
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Diagnostics.CollectionDebugView))]
-public sealed class References : IReadOnlyCollection<ISymbol>
+public sealed class Usings : IReadOnlyCollection<Code>
 {
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private readonly HashSet<ISymbol> Set = new(SymbolEqualityComparer.Default);
+    private readonly HashSet<Code> Set = new();
 
     /// <inheritdoc />
     public int Count => Set.Count;
 
-    public bool Add(ISymbol symbol) 
-        => symbol.HasSource()
-        && Set.Add(symbol);
+    public bool Add(Code? code) 
+        => code is { }
+        && Set.Add(code);
 
     /// <inheritdoc />
     [Pure]
 
-    public IEnumerator<ISymbol> GetEnumerator() => Set.GetEnumerator();
+    public IEnumerator<Code> GetEnumerator() => Set.GetEnumerator();
 
     /// <inheritdoc />
     [Pure]

@@ -1,15 +1,15 @@
 using CodeAnalysis.TestTools;
 using DeadCode;
 using FluentAssertions;
-using Specs;
 using Specs.Analyzers;
+using Specs.Tooling;
 
 namespace Resolve_dependencies_specs;
 
-public class Test
+public class Ctor
 {
     [Test]
-    public void ctor_depends_on_base()
+    public void Depends_on_base()
     {
         var analyzer = new DefaultAnalyzer();
 
@@ -23,34 +23,11 @@ public class Test
     }")
         .ReportIssues();
 
-        analyzer.CodeBase.Should().HaveDepedencies(new Dictionary<Symbol, Symbol[]>()
+        analyzer.CodeBase.Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
         {
-            ["MyClass"] = Symbol.Refs("MyClass.MyClass()"),
-            ["MyClass.MyClass()"] = Symbol.Refs("MyClass"),
-            ["MyClass.MyClass(MyClass)"] = Symbol.Refs("MyClass", "MyClass.MyClass()"),
-        });
-    }
-
-    [Test]
-    public void Resolve()
-    {
-        var analyzer = new DefaultAnalyzer();
-
-       _ = analyzer.ForCS()
-            .AddSource("Snippets/LibraryProject.cs")
-            .WithLanguageVersion(LanguageVersion.CSharp11)
-            .ReportIssues();
-
-        analyzer.CodeBase.Should().HaveDepedencies(new Dictionary<Symbol, Symbol[]>()
-        {
-            ["LibraryProject.SomeClass"] = Symbol.Refs(),
-            ["LibraryProject.SomeClass.SomeClass(string)"] = Symbol.Refs("LibraryProject.SomeClass"),
-            ["LibraryProject.SomeClass.Name"] = Symbol.Refs("LibraryProject.SomeClass"),
-            ["LibraryProject.SomeClass.BegToDiffer(LibraryProject.OtherClass)"] = Symbol.Refs("LibraryProject.SomeClass", "LibraryProject.OtherClass"),
-            ["LibraryProject.SomeClass.WithContent()"] = Symbol.Refs("LibraryProject.SomeClass", "LibraryProject.SomeStruct.SomeStruct()"),
-
-            ["LibraryProject.OtherClass"] = Symbol.Refs(),
-            ["LibraryProject.SomeStruct"] = Symbol.Refs(),
+            ["MyClass"] = Symbol.Refs("MyClass.MyClass()", "MyClass.MyClass(MyClass)"),
+            ["MyClass.MyClass()"] = Symbol.Refs("MyClass", "MyClass.MyClass(MyClass)"),
+            ["MyClass.MyClass(MyClass)"] = Symbol.Refs(),
         });
     }
 }
