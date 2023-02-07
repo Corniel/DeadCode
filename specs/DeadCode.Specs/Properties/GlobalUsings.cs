@@ -1,5 +1,4 @@
 global using NUnit.Framework;
-global using DeadCode.CodeAnalysis;
 global using Microsoft.CodeAnalysis;
 global using Microsoft.CodeAnalysis.Diagnostics;
 global using System;

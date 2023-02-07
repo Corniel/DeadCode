@@ -1,4 +1,4 @@
-﻿using DeadCode;
+﻿using DeadCode.Syntax;
 using FluentAssertions.Execution;
 using Specs.Tooling;
 

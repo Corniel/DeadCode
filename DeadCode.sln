@@ -17,9 +17,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "specs", "specs", "{860C7E9F
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LibraryProject", "specs\LibraryProject\LibraryProject.csproj", "{89F0E885-A616-43C6-85D0-918AF540BB0A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DeadCode.Specs", "specs\DeadCode.Specs\DeadCode.Specs.csproj", "{857BE584-68D6-4530-85DE-024DD2F1D1B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DeadCode.Specs", "specs\DeadCode.Specs\DeadCode.Specs.csproj", "{857BE584-68D6-4530-85DE-024DD2F1D1B0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp", "specs\ConsoleApp\ConsoleApp.csproj", "{6984B959-2460-4C6B-8670-9F943C76600B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleApp", "specs\ConsoleApp\ConsoleApp.csproj", "{6984B959-2460-4C6B-8670-9F943C76600B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

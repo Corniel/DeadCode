@@ -1,4 +1,4 @@
-﻿namespace DeadCode;
+﻿namespace DeadCode.Syntax;
 
 [DebuggerDisplay("{Symbol}, Used by: {UsedBy.Count}, IsDead: {IsDead}")]
 public sealed class Code
@@ -45,7 +45,7 @@ public sealed class Code
     [Pure]
     private bool IsAlive(Tracker tracker)
         => tracker.Add(this) is { } added
-        && UsedBy.Any(use => use.IsAlive(added));
+        && (IsEntryPoint || UsedBy.Any(use => use.IsAlive(added)));
 
     private sealed class Tracker
     {
@@ -69,7 +69,7 @@ public sealed class Code
         [Pure]
         public bool Contains(Code code)
             => Code == code
-            || (Base is { } && Base.Contains(code));
+            || Base is { } && Base.Contains(code);
     }
 }
 

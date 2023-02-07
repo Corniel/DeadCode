@@ -6,12 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference 
-      Include="..\..\src\DeadCode\DeadCode.csproj"
-      PrivateAssets="all"
-      ReferenceOutputAssembly="true"
-      OutputItemType="Analyzer"/>
-  </ItemGroup>
-
 </Project>

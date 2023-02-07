@@ -1,4 +1,4 @@
-﻿namespace DeadCode;
+﻿namespace DeadCode.Syntax;
 
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Diagnostics.CollectionDebugView))]
@@ -10,7 +10,7 @@ public sealed class Usings : IReadOnlyCollection<Code>
     /// <inheritdoc />
     public int Count => Set.Count;
 
-    public bool Add(Code? code) 
+    public bool Add(Code? code)
         => code is { }
         && Set.Add(code);
 

@@ -1,4 +1,4 @@
-﻿using DeadCode;
+﻿using DeadCode.Syntax;
 
 namespace FluentAssertions;
 

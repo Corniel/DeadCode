@@ -1,17 +1,18 @@
-﻿namespace DeadCode;
+﻿using DeadCode.Syntax;
 
-internal sealed class CSharpDepedencyResolver : CSharpSyntaxWalker
+namespace DeadCode;
+
+internal sealed class CSharpCodeBaseResolver : CSharpSyntaxWalker
 {
-    public CSharpDepedencyResolver(DepedencyResolver resolver, SemanticModel model)
+    public CSharpCodeBaseResolver(CodeBase codeBase, SemanticModel model)
     {
-        Resolver = resolver;
+        CodeBase = codeBase;
         Model = model;
     }
 
-    private readonly DepedencyResolver Resolver;
+    private readonly CodeBase CodeBase;
     private readonly SemanticModel Model;
-    private CodeBase CodeBase => Resolver.CodeBase;
-
+    
     public override void VisitClassDeclaration(ClassDeclarationSyntax node)
     {
         if (Model.GetDeclaredSymbol(node) is { } type)
@@ -62,8 +63,7 @@ internal sealed class CSharpDepedencyResolver : CSharpSyntaxWalker
     {
         if (Model.GetDeclaredSymbol(node) is { } method)
         {
-            var code = CodeBase.SetNode(method, node);
-            code.IsEntryPoint = Resolver.IsEntryPoint(method);
+            CodeBase.SetNode(method, node);
         }
         base.VisitMethodDeclaration(node);
     }

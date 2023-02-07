@@ -1,4 +1,4 @@
-﻿namespace DeadCode;
+﻿namespace DeadCode.Syntax;
 
 public sealed class CodeBase
 {
@@ -35,7 +35,9 @@ public sealed class CodeBase
 
     public IReadOnlyCollection<Code> Code => lookup.Values;
 
-    public bool FullyResolved => Code.All(c => c.Node is { });
+    public bool FullyResolved
+        => Code.All(c => c.Node is { })
+        && Code.Any(c => c.IsEntryPoint);
 
     public Code? Parent(SyntaxNode node)
     {
@@ -59,7 +61,7 @@ public sealed class CodeBase
         GetOrCreate(method.ContainingType)!.UsedBy.Add(code);
         GetOrCreate(method.ReturnType)?.UsedBy.Add(code);
 
-        foreach (var type in method.TypeArguments)
+        foreach (var type in method.TypeArguments.Where(t => t.TypeKind != TypeKind.TypeParameter))
         {
             GetOrCreate(type)!.UsedBy.Add(code);
         }
