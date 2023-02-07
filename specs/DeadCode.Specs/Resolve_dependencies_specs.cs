@@ -11,7 +11,7 @@ public class Ctor
     [Test]
     public void Depends_on_base()
     {
-        var analyzer = new CodeBaseResolver();
+        var analyzer = new CollectionAnalyzer();
 
         _ = analyzer.ForCS()
         .AddSnippet(@"
@@ -36,7 +36,7 @@ static class Dependencies
 {
     public static CodeBase Resolve(string snippet)
     {
-        var analyzer = new CodeBaseResolver();
+        var analyzer = new CollectionAnalyzer();
 
         _ = analyzer.ForCS()
             .AddSnippet(snippet)

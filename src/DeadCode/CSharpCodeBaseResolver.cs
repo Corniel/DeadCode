@@ -2,7 +2,7 @@
 
 namespace DeadCode;
 
-internal sealed class CSharpCodeBaseResolver : CSharpSyntaxWalker
+public sealed class CSharpCodeBaseResolver : CSharpSyntaxWalker
 {
     public CSharpCodeBaseResolver(CodeBase codeBase, Document document, SemanticModel model)
     {

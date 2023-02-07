@@ -10,7 +10,7 @@ public class Entry_point_specs
     [Test]
     public void Test()
     {
-        var analyzer = new CodeBaseResolver();
+        var analyzer = new CollectionAnalyzer();
 
         _ = analyzer.ForCS()
         .WithOutputKind(OutputKind.ConsoleApplication)
