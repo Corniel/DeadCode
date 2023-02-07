@@ -15,7 +15,7 @@ public sealed class CodeBase
 
     public Code? GetOrCreate(ISymbol symbol)
     {
-        if (symbol.HasSource())
+        if (symbol is not ITypeSymbol type || !type.Is(SystemType.System_Void))
         {
             lock (locker)
             {

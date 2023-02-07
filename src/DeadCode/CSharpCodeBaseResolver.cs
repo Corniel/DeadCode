@@ -89,4 +89,3 @@ internal sealed class CSharpCodeBaseResolver : CSharpSyntaxWalker
         base.VisitIdentifierName(node);
     }
 }
-

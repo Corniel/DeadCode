@@ -34,7 +34,7 @@ public sealed class Code
             else
             {
                 _IsAlive = IsAlive(Tracker.Empty);
-                return !_IsAlive;
+                return !_IsAlive && Node is { };
             }
         }
     }
@@ -72,4 +72,3 @@ public sealed class Code
             || Base is { } && Base.Contains(code);
     }
 }
-
