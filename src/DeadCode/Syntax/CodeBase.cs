@@ -45,18 +45,20 @@ public sealed class CodeBase
         Code? Find(SyntaxNode node) => nodes.TryGetValue(node, out var code) ? code : null;
     }
 
-    public Code SetNode(INamedTypeSymbol type, SyntaxNode node)
+    public Code SetNode(INamedTypeSymbol type, SyntaxNode node, Document document)
     {
         var code = GetOrCreate(type);
         code.Node = node;
+        code.Document = document;
         nodes[node] = code;
         return code;
     }
 
-    public Code SetNode(IMethodSymbol method, SyntaxNode node)
+    public Code SetNode(IMethodSymbol method, SyntaxNode node, Document document)
     {
         var code = GetOrCreate(method);
         code!.Node = node;
+        code.Document = document;
         nodes[node] = code;
         GetOrCreate(method.ContainingType)!.UsedBy.Add(code);
         GetOrCreate(method.ReturnType)?.UsedBy.Add(code);

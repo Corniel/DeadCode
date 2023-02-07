@@ -13,6 +13,9 @@ public sealed class Code
     /// <summary>The linked syntax node.</summary>
     public SyntaxNode? Node { get; internal set; }
 
+    /// <summary>The linked document.</summary>
+    public Document? Document { get; internal set; }
+
     /// <summary>The code symbol.</summary>
     public ISymbol Symbol { get; }
 

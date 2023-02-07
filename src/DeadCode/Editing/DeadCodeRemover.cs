@@ -1,22 +1,38 @@
 ﻿using DeadCode.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace DeadCode.Editing;
 
-public sealed class DeadCodeRemover
+public static class DeadCodeRemover
 {
-    public async Task Change(CodeBase codeBase, IReadOnlyDictionary<string, Document> documents)
+    public static async Task Change(CodeBase codeBase)
     {
-        foreach(var code in codeBase.Code.Where(c => c.IsDead))
+        foreach (var code in codeBase.Code)
         {
-            if(documents.TryGetValue(code.Node!.SyntaxTree.FilePath, out var document)) 
+            if (code.IsDead) 
             {
-                var editor = await DocumentEditor.CreateAsync(document);
+                var editor = await DocumentEditor.CreateAsync(code.Document);
                 editor.RemoveNode(code.Node!);
+                var updated = editor.GetChangedDocument();
+
+                if( updated is { } && await updated.ContainsCode())
+                {
+                    var newContent = (await updated.GetSyntaxTreeAsync())?
+                        .GetCompilationUnitRoot()
+                        .NormalizeWhitespace()
+                        .GetText()
+                        .ToString();
+                    
+                    using var writer = new StreamWriter(updated.FilePath!);
+                    writer.Write(newContent);
+                }
+                else
+                {
+                    File.Delete(code.Document!.FilePath!);
+                }
             }
-            //var doc = code.Node.
-            //var document = code.Node.GetDo
         }
     }
 }

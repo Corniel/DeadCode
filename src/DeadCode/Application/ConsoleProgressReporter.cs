@@ -2,7 +2,7 @@
 using System;
 using System.IO;
 
-namespace DeadCode.App;
+namespace DeadCode;
 
 internal class ConsoleProgressReporter : IProgress<ProjectLoadProgress>
 {

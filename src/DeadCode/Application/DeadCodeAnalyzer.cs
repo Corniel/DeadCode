@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using DeadCode.App;
 using DeadCode.Application;
+using DeadCode.Editing;
 using DeadCode.Syntax;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis.MSBuild;
@@ -16,10 +17,7 @@ public static class DeadCodeAnalyzer
     public static async Task Run(DeadCodeAnalyzerOptions options)
     {
         Guard.NotNull(options, nameof(options));
-
-        var codeBase = new CodeBase();
-        var analyzers = (new DiagnosticAnalyzer[] { new CodeBaseResolver(codeBase) }).ToImmutableArray();
-
+        
         var instance = MSBuildLocator.QueryVisualStudioInstances()
             .OrderByDescending(i => i.Version)
             .FirstOrDefault()
@@ -34,18 +32,9 @@ public static class DeadCodeAnalyzer
 
         var sw = Stopwatch.StartNew();
 
-        var documents = new Dictionary<string, Document>();
+        var project = solution.Projects.Where(ExcludeTests);
+        var codeBase = await Collect(project);
 
-        foreach (var project in solution.Projects.Where(ExcludeTests))
-        {
-            var compilation = (await project.GetCompilationAsync())!.WithAnalyzers(analyzers);
-            await compilation.GetAllDiagnosticsAsync();
-
-            foreach(var doc in project.Documents.Where(d => d.FilePath is { }))
-            {
-                documents[doc.FilePath!] = doc;
-            }
-        }
         sw.Stop();
 
         Console.WriteLine($"nodes: {codeBase.Code.Count} ({sw.ElapsedMilliseconds} ms)");
@@ -65,6 +54,30 @@ public static class DeadCodeAnalyzer
 
         var alive = codeBase.Code.Where(c => !c.IsDead).ToArray();
         var dead = codeBase.Code.Where(c => c.IsDead).ToArray();
+
+        DeadCodeRemover.Change(codeBase);
+
+    }
+
+    public static async Task<CodeBase> Collect(IEnumerable<Project> projects)
+    {
+        Guard.NotNull(projects, nameof(projects));
+
+        var codebase = new CodeBase();
+
+        foreach (var project in projects)
+        {
+            foreach(var document in project.Documents)
+            {
+                if (await document.GetSyntaxRootAsync() is { } root
+                    && await document.GetSemanticModelAsync() is { } model)
+                {
+                    var resolver = new CSharpCodeBaseResolver(codebase, document, model);
+                    resolver.Visit(root);
+                }
+            }
+        }
+        return codebase;
     }
 
     private static bool ExcludeTests(Project project)

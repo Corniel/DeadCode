@@ -4,20 +4,23 @@ namespace DeadCode;
 
 internal sealed class CSharpCodeBaseResolver : CSharpSyntaxWalker
 {
-    public CSharpCodeBaseResolver(CodeBase codeBase, SemanticModel model)
+    public CSharpCodeBaseResolver(CodeBase codeBase, Document document, SemanticModel model)
     {
         CodeBase = codeBase;
+        Document = document;
         Model = model;
+        
     }
 
     private readonly CodeBase CodeBase;
     private readonly SemanticModel Model;
+    private readonly Document Document;
     
     public override void VisitClassDeclaration(ClassDeclarationSyntax node)
     {
         if (Model.GetDeclaredSymbol(node) is { } type)
         {
-            CodeBase.SetNode(type, node);
+            CodeBase.SetNode(type, node, Document);
         }
         base.VisitClassDeclaration(node);
     }
@@ -26,7 +29,7 @@ internal sealed class CSharpCodeBaseResolver : CSharpSyntaxWalker
     {
         if (Model.GetDeclaredSymbol(node) is { } type)
         {
-            CodeBase.SetNode(type, node);
+            CodeBase.SetNode(type, node, Document);
         }
         base.VisitStructDeclaration(node);
     }
@@ -35,7 +38,7 @@ internal sealed class CSharpCodeBaseResolver : CSharpSyntaxWalker
     {
         if (Model.GetDeclaredSymbol(node) is { } type)
         {
-            CodeBase.SetNode(type, node);
+            CodeBase.SetNode(type, node, Document);
         }
         base.VisitRecordDeclaration(node);
     }
@@ -44,7 +47,7 @@ internal sealed class CSharpCodeBaseResolver : CSharpSyntaxWalker
     {
         if (Model.GetDeclaredSymbol(node) is { } ctor)
         {
-            var code = CodeBase.SetNode(ctor, node);
+            var code = CodeBase.SetNode(ctor, node, Document);
 
             if (node.Initializer is { } initializer && Model.GetSymbolInfo(initializer).Symbol is { } init)
             {
@@ -63,7 +66,7 @@ internal sealed class CSharpCodeBaseResolver : CSharpSyntaxWalker
     {
         if (Model.GetDeclaredSymbol(node) is { } method)
         {
-            CodeBase.SetNode(method, node);
+            CodeBase.SetNode(method, node, Document);
         }
         base.VisitMethodDeclaration(node);
     }
