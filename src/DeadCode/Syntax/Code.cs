@@ -30,14 +30,18 @@ public sealed class Code
     {
         get
         {
-            if (IsEntryPoint || _IsAlive)
+            if (IsEntryPoint 
+                || _IsAlive 
+                || Node is null 
+                || Symbol.IsOverride
+                || Symbol.IsImplementation())
             {
                 return false;
             }
             else
             {
                 _IsAlive = IsAlive(Tracker.Empty);
-                return !_IsAlive && Node is { };
+                return !_IsAlive;
             }
         }
     }

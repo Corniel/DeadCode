@@ -1,6 +1,3 @@
-using CodeAnalysis.TestTools;
-using DeadCode;
-using DeadCode.Syntax;
 using FluentAssertions;
 using Specs.Tooling;
 
@@ -11,19 +8,14 @@ public class Ctor
     [Test]
     public void Depends_on_base()
     {
-        var analyzer = new CollectionAnalyzer();
-
-        _ = analyzer.ForCS()
-        .AddSnippet(@"
+        Setup.Collector().AddSnippet(@"
             
     public class MyClass
     {
         public MyClass() { }
         public MyClass(MyClass other) : this(){ }
     }")
-        .ReportIssues();
-
-        analyzer.CodeBase.Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
         {
             ["MyClass"] = Symbol.Refs("MyClass.MyClass()", "MyClass.MyClass(MyClass)"),
             ["MyClass.MyClass()"] = Symbol.Refs("MyClass", "MyClass.MyClass(MyClass)"),
@@ -32,17 +24,60 @@ public class Ctor
     }
 }
 
-static class Dependencies
+public class Overrides
 {
-    public static CodeBase Resolve(string snippet)
+    [Test]
+    public void Is_Not_dead()
     {
-        var analyzer = new CollectionAnalyzer();
+        Setup.Collector().AddSnippet(@"
+            
+    public class MyClass
+    {
+        public override string ToString() => "";
+    }")
+        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+        {
+            ["MyClass"] = Symbol.Refs("MyClass.ToString()"),
+            ["MyClass.ToString()"] = Symbol.Refs(),
+            ["string"] = Symbol.Refs("MyClass.ToString()"),
+        })
+        .And.HaveIsActive(
+            "MyClass.ToString()",
+            "string");
+    }
+}
 
-        _ = analyzer.ForCS()
-            .AddSnippet(snippet)
-            .WithLanguageVersion(LanguageVersion.CSharp11)
-            .ReportIssues();
+public class Implements
+{
+    [Test]
+    public void Is_not_dead()
+    {
+        Setup.Collector().AddSnippet(@"
 
-        return analyzer.CodeBase;
+    public interface MyInterface
+    {
+        void Do();
+        MyInterface Parent { get; }
+    }
+
+    public class MyClass : MyInterface
+    {
+        public void Do() { }
+        public MyInterface => this;
+    }")
+        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+        {
+            ["MyClass"] = Symbol.Refs("MyClass.Do()"),
+            ["MyClass.Do()"] = Symbol.Refs(),
+            ["MyInterface"] = Symbol.Refs(
+                "MyInterface.Do()", 
+                "MyInterface.Parent",
+                "MyClass"),
+            ["MyInterface.Do()"] = Symbol.Refs(),
+            ["MyInterface.Parent"] = Symbol.Refs(),
+        })
+        .And.HaveIsActive(
+            "MyClass.Do()",
+            "MyClass.Parent");
     }
 }

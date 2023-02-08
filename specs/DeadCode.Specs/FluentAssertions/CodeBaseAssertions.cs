@@ -1,5 +1,6 @@
 ﻿using DeadCode.Syntax;
 using FluentAssertions.Execution;
+using Microsoft.CodeAnalysis;
 using Specs.Tooling;
 
 namespace FluentAssertions;
@@ -53,6 +54,52 @@ public sealed class CodeBaseAssertions
                 report.AppendLine($"[+] {code.Symbol}");
                 issues++;
             }
+        }
+
+        Execute.Assertion
+            .ForCondition(issues == 0)
+            .FailWith(report.ToString());
+
+        Console.WriteLine(report);
+
+        return new(this);
+    }
+
+    public AndConstraint<CodeBaseAssertions> HaveEntryPoints(params Symbol[] symbols) 
+        => Check(symbols, c => c.IsEntryPoint);
+
+    public AndConstraint<CodeBaseAssertions> HaveIsActive(params Symbol[] symbols)
+        => Check(symbols, c => !c.IsDead && !c.IsEntryPoint);
+
+    public AndConstraint<CodeBaseAssertions> HaveDead(params Symbol[] symbols)
+        => Check(symbols, c => c.IsDead);
+
+    private AndConstraint<CodeBaseAssertions> Check(Symbol[] symbols, Func<Code, bool> check)
+    {
+        var issues = 0;
+        var report = new StringBuilder();
+
+        var iSymbols = symbols.Select(s => Subject.Symbols.FirstOrDefault(i => s.Equals(i))).OfType<ISymbol>().ToArray();
+
+        foreach (var symbol in iSymbols)
+        {
+            var code = Subject[symbol];
+            if (check(code))
+            {
+                report.AppendLine($"[ ] {symbol}");
+            }
+            else
+            {
+                report.AppendLine($"[-] {symbol}");
+                issues++;
+            }
+        }
+        foreach (var code in Subject.Code.Where(c
+            => !iSymbols.Contains(c.Symbol, SymbolEqualityComparer.Default)
+            && check(c)))
+        {
+            report.AppendLine($"[+] {code.Symbol}");
+            issues++;
         }
 
         Execute.Assertion

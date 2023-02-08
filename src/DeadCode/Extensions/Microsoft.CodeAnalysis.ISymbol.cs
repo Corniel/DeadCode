@@ -27,6 +27,14 @@ public static class DeadCodeSymbolExtensions
         => type.IsAssignableTo(SystemType.System_Exception);
 
     [Pure]
+    public static bool IsImplementation(this ISymbol symbol)
+        => symbol.ContainingType is { IsType: true } containing 
+        && containing.TypeKind != TypeKind.Interface
+        && containing.Interfaces
+            .SelectMany(i => i.GetMembers())
+            .Any(m => symbol.Equals(containing.FindImplementationForInterfaceMember(m), SymbolEqualityComparer.Default));
+
+    [Pure]
     public static bool IsObsolete(this ITypeSymbol type)
         => type.GetAttributes().Any(attr => attr.AttributeClass.Is(SystemType.System_ObsoleteAttribute));
 

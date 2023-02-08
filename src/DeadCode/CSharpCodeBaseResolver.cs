@@ -15,7 +15,16 @@ public sealed class CSharpCodeBaseResolver : CSharpSyntaxWalker
     private readonly CodeBase CodeBase;
     private readonly SemanticModel Model;
     private readonly Document Document;
-    
+
+    public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
+    {
+        if (Model.GetDeclaredSymbol(node) is { } type)
+        {
+            CodeBase.SetNode(type, node, Document);
+        }
+        base.VisitInterfaceDeclaration(node);
+    }
+
     public override void VisitClassDeclaration(ClassDeclarationSyntax node)
     {
         if (Model.GetDeclaredSymbol(node) is { } type)
