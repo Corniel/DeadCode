@@ -15,7 +15,12 @@ public sealed class CodeBase
 
     public Code? GetOrCreate(ISymbol symbol)
     {
-        if (symbol is not ITypeSymbol type || !type.Is(SystemType.System_Void))
+        if (symbol.Is(SystemType.System_Void)
+            || symbol.Kind == SymbolKind.Discard)
+        {
+            return null;
+        }
+        else
         {
             lock (locker)
             {
@@ -27,7 +32,6 @@ public sealed class CodeBase
                 return code;
             }
         }
-        else { return null; }
     }
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]

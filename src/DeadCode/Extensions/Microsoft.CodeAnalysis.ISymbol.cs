@@ -10,6 +10,10 @@ public static class DeadCodeSymbolExtensions
         => !symbol.Is(type);
 
     [Pure]
+    public static bool Is(this ISymbol? symbol, SystemType type)
+        => symbol is ITypeSymbol typed && typed.Is(type);
+
+    [Pure]
     public static bool Is(this ITypeSymbol? symbol, SystemType type)
         => symbol is { } && symbol.IsMatch(type);
 

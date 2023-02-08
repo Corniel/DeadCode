@@ -82,10 +82,10 @@ public class Implements
     }
 }
 
-public class References
+public class References_regonized
 {
     [Test]
-    public void To_method_is_regonized()
+    public void method()
     {
         Setup.Collector().AddSnippet(@"
             
@@ -104,7 +104,7 @@ public class References
     }
 
     [Test]
-    public void To_property_is_regonized()
+    public void property()
     {
         Setup.Collector().AddSnippet(@"
             
@@ -120,6 +120,53 @@ public class References
             ["MyClass.Other"] = Symbol.Array("MyClass.Do()"),
             ["MyClass.Do()"] = Symbol.Array(),
             ["int"] = Symbol.Array("MyClass.Other", "MyClass.Do()"),
+        });
+    }
+
+    [Test]
+    public void new_ctor()
+    {
+        Setup.Collector().AddSnippet(@"
+            
+    public class MyClass
+    {
+        void Do()
+        {
+            _ = new Other();
+        }
+    }
+    class Other { }
+")
+        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+        {
+            ["MyClass"] = Symbol.Array( "MyClass.Do()"),
+            ["MyClass.Do()"] = Symbol.Array(),
+            ["Other"] = Symbol.Array(),
+            ["Other.Other()"] = Symbol.Array("MyClass.Do()"),
+        });
+    }
+
+    [Test]
+    public void in_method_calls()
+    {
+        Setup.Collector().AddSnippet(@"
+            
+    public class MyClass
+    {
+        void Do()
+        {
+            string.Format(""{0}"", new Other());
+        }
+    }
+    class Other { }
+")
+        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+        {
+            ["MyClass"] = Symbol.Array("MyClass.Do()"),
+            ["MyClass.Do()"] = Symbol.Array(),
+            ["Other"] = Symbol.Array(),
+            ["Other.Other()"] = Symbol.Array("MyClass.Do()"),
+            ["string.Format(string, object?)"] = Symbol.Array("MyClass.Do()"),
         });
     }
 }

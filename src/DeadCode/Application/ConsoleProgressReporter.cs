@@ -1,5 +1,4 @@
 ﻿using Microsoft.CodeAnalysis.MSBuild;
-using System;
 using System.IO;
 
 namespace DeadCode;
