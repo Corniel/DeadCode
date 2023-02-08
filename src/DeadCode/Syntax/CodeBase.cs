@@ -13,6 +13,16 @@ public sealed class CodeBase
 
     public Code this[ISymbol symbol] => lookup[symbol];
 
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    public IReadOnlyCollection<ISymbol> Symbols => lookup.Keys;
+
+    public IReadOnlyCollection<Code> Code => lookup.Values;
+
+    public bool FullyResolved
+        => Code.All(c => c.Node is { })
+        && Code.Any(c => c.IsEntryPoint);
+
+
     public Code? GetOrCreate(ISymbol symbol)
     {
         if (symbol.Is(SystemType.System_Void)
@@ -34,14 +44,14 @@ public sealed class CodeBase
         }
     }
 
-    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    public IReadOnlyCollection<ISymbol> Symbols => lookup.Keys;
-
-    public IReadOnlyCollection<Code> Code => lookup.Values;
-
-    public bool FullyResolved
-        => Code.All(c => c.Node is { })
-        && Code.Any(c => c.IsEntryPoint);
+    private Code GetOrCreate(ISymbol symbol, SyntaxNode node, Document document)
+    {
+        var code = GetOrCreate(symbol)!;
+        code.Node = node;
+        code.Document = document;
+        nodes[node] = code;
+        return code;
+    }
 
     public Code? Parent(SyntaxNode node)
     {
@@ -50,20 +60,11 @@ public sealed class CodeBase
     }
 
     public Code SetNode(INamedTypeSymbol type, SyntaxNode node, Document document)
-    {
-        var code = GetOrCreate(type);
-        code.Node = node;
-        code.Document = document;
-        nodes[node] = code;
-        return code;
-    }
+        => GetOrCreate(type, node, document);
 
     public Code SetNode(IMethodSymbol method, SyntaxNode node, Document document)
     {
-        var code = GetOrCreate(method);
-        code!.Node = node;
-        code.Document = document;
-        nodes[node] = code;
+        var code = GetOrCreate(method, node, document);
         GetOrCreate(method.ContainingType)!.UsedBy.Add(code);
         GetOrCreate(method.ReturnType)?.UsedBy.Add(code);
 
@@ -74,11 +75,9 @@ public sealed class CodeBase
         return code;
     }
 
-    public Code SetNode(IPropertySymbol prop, SyntaxNode node)
+    public Code SetNode(IPropertySymbol prop, SyntaxNode node, Document document)
     {
-        var code = GetOrCreate(prop)!;
-        code.Node = node;
-        nodes[node] = code;
+        var code = GetOrCreate(prop, node, document);
         GetOrCreate(prop.ContainingType)!.UsedBy?.Add(code);
         GetOrCreate(prop.Type)?.UsedBy?.Add(code);
         return code;
