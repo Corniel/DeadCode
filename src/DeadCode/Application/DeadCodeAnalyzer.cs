@@ -49,14 +49,8 @@ public static class DeadCodeAnalyzer
 
         Console.WriteLine($"used: {codeBase.Code.Count(c => !c.IsDead)}");
 
-        
-
-
-        var alive = codeBase.Code.Where(c => !c.IsDead).ToArray();
-        var dead = codeBase.Code.Where(c => c.IsDead).ToArray();
-
-        DeadCodeRemover.Change(codeBase);
-
+        await DeadCodeDecorator.Change(codeBase);
+        //await DeadCodeRemover.Change(codeBase);
     }
 
     public static async Task<CodeBase> Collect(IEnumerable<Project> projects)
