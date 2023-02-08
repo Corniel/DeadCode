@@ -20,6 +20,8 @@ public static class DeadCodeDecorator
         {
             if (code.IsDead) 
             {
+                var argumentList = code.Node.ChildNodes().OfType<ArgumentSyntax>().FirstOrDefault();  
+
                 var editor = await DocumentEditor.CreateAsync(code.Document);
                 editor.InsertBefore(code.Node!, Attribute());
                 var updated = editor.GetChangedDocument();
