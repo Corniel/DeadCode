@@ -30,9 +30,9 @@ public readonly struct Symbol : IEquatable<ISymbol>
 
     public static implicit operator Symbol(string name) => new(name);
 
-    public static Symbol[] Refs(params string[] symbols)
+    public static Symbol[] Array(params string[] symbols)
         => symbols.Any()
         ? symbols.Select(name => new Symbol(name)).ToArray()
-        : Array.Empty<Symbol>();
+        : System.Array.Empty<Symbol>();
 
 }

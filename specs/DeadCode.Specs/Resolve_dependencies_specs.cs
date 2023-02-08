@@ -17,9 +17,9 @@ public class Ctor
     }")
         .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
         {
-            ["MyClass"] = Symbol.Refs("MyClass.MyClass()", "MyClass.MyClass(MyClass)"),
-            ["MyClass.MyClass()"] = Symbol.Refs("MyClass", "MyClass.MyClass(MyClass)"),
-            ["MyClass.MyClass(MyClass)"] = Symbol.Refs(),
+            ["MyClass"] = Symbol.Array("MyClass.MyClass()", "MyClass.MyClass(MyClass)"),
+            ["MyClass.MyClass()"] = Symbol.Array("MyClass", "MyClass.MyClass(MyClass)"),
+            ["MyClass.MyClass(MyClass)"] = Symbol.Array(),
         });
     }
 }
@@ -37,9 +37,9 @@ public class Overrides
     }")
         .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
         {
-            ["MyClass"] = Symbol.Refs("MyClass.ToString()"),
-            ["MyClass.ToString()"] = Symbol.Refs(),
-            ["string"] = Symbol.Refs("MyClass.ToString()"),
+            ["MyClass"] = Symbol.Array("MyClass.ToString()"),
+            ["MyClass.ToString()"] = Symbol.Array(),
+            ["string"] = Symbol.Array("MyClass.ToString()"),
         })
         .And.HaveIsActive(
             "MyClass.ToString()",
@@ -67,17 +67,59 @@ public class Implements
     }")
         .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
         {
-            ["MyClass"] = Symbol.Refs("MyClass.Do()"),
-            ["MyClass.Do()"] = Symbol.Refs(),
-            ["MyInterface"] = Symbol.Refs(
+            ["MyClass"] = Symbol.Array("MyClass.Do()"),
+            ["MyClass.Do()"] = Symbol.Array(),
+            ["MyInterface"] = Symbol.Array(
                 "MyInterface.Do()", 
                 "MyInterface.Parent",
                 "MyClass"),
-            ["MyInterface.Do()"] = Symbol.Refs(),
-            ["MyInterface.Parent"] = Symbol.Refs(),
+            ["MyInterface.Do()"] = Symbol.Array(),
+            ["MyInterface.Parent"] = Symbol.Array(),
         })
         .And.HaveIsActive(
             "MyClass.Do()",
             "MyClass.Parent");
+    }
+}
+
+public class References
+{
+    [Test]
+    public void To_method_is_regonized()
+    {
+        Setup.Collector().AddSnippet(@"
+            
+    public class MyClass
+    {
+        protected void Other() { }
+
+        public void Do() => Other();
+    }")
+        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+        {
+            ["MyClass"] = Symbol.Array("MyClass.Other()", "MyClass.Do()"),
+            ["MyClass.Other()"] = Symbol.Array("MyClass.Do()"),
+            ["MyClass.Do()"] = Symbol.Array(),
+        });
+    }
+
+    [Test]
+    public void To_property_is_regonized()
+    {
+        Setup.Collector().AddSnippet(@"
+            
+    public class MyClass
+    {
+        protected int Other { get; }
+
+        public int Do() => Other;
+    }")
+        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+        {
+            ["MyClass"] = Symbol.Array("MyClass.Other", "MyClass.Do()"),
+            ["MyClass.Other"] = Symbol.Array("MyClass.Do()"),
+            ["MyClass.Do()"] = Symbol.Array(),
+            ["int"] = Symbol.Array("MyClass.Other", "MyClass.Do()"),
+        });
     }
 }
