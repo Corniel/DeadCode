@@ -84,7 +84,7 @@ public sealed class CSharpCodeBaseResolver : CSharpSyntaxWalker
     {
         if (Model.GetDeclaredSymbol(node) is { } property)
         {
-            CodeBase.SetNode(property, node);
+            CodeBase.SetNode(property, node, Document);
         }
         base.VisitPropertyDeclaration(node);
     }

@@ -17,14 +17,8 @@ public static class DeadCodeAnalyzer
     public static async Task Run(DeadCodeAnalyzerOptions options)
     {
         Guard.NotNull(options, nameof(options));
-        
-        var instance = MSBuildLocator.QueryVisualStudioInstances()
-            .OrderByDescending(i => i.Version)
-            .FirstOrDefault()
-            ?? throw new InvalidOperationException("No instance of Visual Studio detected.");
 
-        MSBuildLocator.RegisterInstance(instance);
-
+        MSBuildLocator.RegisterDefaults();
         using var workspace = MSBuildWorkspace.Create();
         workspace.WorkspaceFailed += (o, e) => Console.Error.WriteLine(e.Diagnostic.Message);
 
