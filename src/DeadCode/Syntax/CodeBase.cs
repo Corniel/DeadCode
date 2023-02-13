@@ -3,7 +3,7 @@
 public sealed class CodeBase
 {
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-    private readonly Dictionary<ISymbol, Code> lookup = new(SymbolEqualityComparer.Default);
+    private readonly Dictionary<ISymbol, Code> lookup = new(SymbolEqualityComparer.IncludeNullability);
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private readonly Dictionary<SyntaxNode, Code> nodes = new();
@@ -25,6 +25,11 @@ public sealed class CodeBase
 
     public Code? GetOrCreate(ISymbol symbol)
     {
+        if (symbol.Kind == SymbolKind.Local)
+        {
+            symbol = symbol.ContainingType;
+        }
+
         if (symbol.Is(SystemType.System_Void)
             || symbol.Kind == SymbolKind.Discard)
         {

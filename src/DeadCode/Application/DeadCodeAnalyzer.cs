@@ -1,10 +1,10 @@
 ﻿using CommandLine;
-using DeadCode.App;
 using DeadCode.Application;
 using DeadCode.Editing;
 using DeadCode.Syntax;
 using Microsoft.Build.Locator;
 using Microsoft.CodeAnalysis.MSBuild;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace DeadCode;
@@ -43,8 +43,11 @@ public static class DeadCodeAnalyzer
 
         Console.WriteLine($"used: {codeBase.Code.Count(c => !c.IsDead)}");
 
+        DeadCodeLogger.Writer = new StreamWriter("c:/TEMP/dead-code.log", false);
+        await DeadCodeLogger.Apply(codeBase);
+
         //await DeadCodeDecorator.Change(codeBase);
-        await DeadCodeRemover.Change(codeBase);
+        //await DeadCodeRemover.Change(codeBase);
     }
 
     public static async Task<CodeBase> Collect(IEnumerable<Project> projects)
