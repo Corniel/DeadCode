@@ -60,17 +60,44 @@ public sealed class CodeBase
     {
         if (model.GetDeclaredSymbol(declaration) is { } symbol)
         {
-            var method = GetCode(symbol);
-            method.Link(declaration, document);
+            var member = GetCode(symbol);
+            member.Link(declaration, document);
 
             var type = GetCode(symbol.ContainingType);
-            type.UsedBy.Add(method);
+            type.UsedBy.Add(member);
 
-            return method;
+            foreach (var other in Symbols(symbol))
+            {
+                if (TryGetCode(other) is { } code)
+                {
+                    code.UsedBy.Add(member);
+                }
+            }
+            return member;
         }
         else
         {
             return null;
+        }
+
+        static IEnumerable<ISymbol> Symbols(ISymbol symbol)
+        {
+            if(symbol is IMethodSymbol method)
+            {
+                foreach(var param in method.Parameters)
+                {
+                    yield return param.Type;
+                }
+                yield return method.ReturnType;
+            }
+            else if (symbol is IPropertySymbol property)
+            {
+                yield return property.Type;
+            }
+            else if (symbol is IFieldSymbol field)
+            {
+                yield return field.Type;
+            }
         }
     }
 

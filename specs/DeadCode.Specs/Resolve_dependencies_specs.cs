@@ -3,6 +3,68 @@ using Specs.Tooling;
 
 namespace Resolve_dependencies_specs;
 
+public class Fields_are
+{
+    [Test]
+    public void used_by_containing_and_return_type()
+    {
+        Setup.Collector().AddSnippet(@"
+            
+    public class MyClass
+    {
+        public int MyField;
+    }")
+            .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+            {
+                ["MyClass"] = Symbol.Array("MyClass.MyField"),
+                ["MyClass.MyField"] = Symbol.Array(),
+                ["int"] = Symbol.Array("MyClass.MyField"),
+            });
+    }
+}
+
+public class Properties_are
+{
+    [Test]
+    public void used_by_containing_and_return_type()
+    {
+        Setup.Collector().AddSnippet(@"
+            
+    public class MyClass
+    {
+        public int MyProperty { get; set; }
+    }")
+            .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+            {
+                ["MyClass"] = Symbol.Array("MyClass.MyProperty"),
+                ["MyClass.MyProperty"] = Symbol.Array(),
+                ["int"] = Symbol.Array("MyClass.MyProperty"),
+            });
+        }
+}
+
+public class Methods_are
+{
+    [Test]
+    public void used_by_containing_return_and_parameter_types()
+    {
+        Setup.Collector().AddSnippet(@"
+            
+    public class MyClass
+    {
+        public int MyMethod(double f, bool s) => 42;
+    }")
+            .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+            {
+                ["MyClass"] = Symbol.Array("MyClass.MyMethod(double, bool)"),
+                ["MyClass.MyMethod(double, bool)"] = Symbol.Array(),
+                ["int"] = Symbol.Array("MyClass.MyMethod(double, bool)"),
+                ["double"] = Symbol.Array("MyClass.MyMethod(double, bool)"),
+                ["bool"] = Symbol.Array("MyClass.MyMethod(double, bool)"),
+            });
+    }
+}
+
 public class Ctor
 {
     [Test]
@@ -112,7 +174,7 @@ public class References_regonized
     {
         protected int Other { get; }
 
-        public int Do() => Other;
+        public int Do() => 42;
     }")
         .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
         {

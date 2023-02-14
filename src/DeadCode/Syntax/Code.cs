@@ -49,8 +49,8 @@ public class Code
 
     public void Link(SyntaxNode node, Document document)
     {
-        Node = Guard.NotNull(node, nameof(node));
-        Document = Guard.NotNull(document, nameof(document));
+        Node = node;
+        Document = document;
     }
 
     [Pure]

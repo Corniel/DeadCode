@@ -39,6 +39,15 @@ public sealed class CSharpCodeBaseResolver : CSharpSyntaxWalker
         base.VisitRecordDeclaration(node);
     }
 
+    public override void VisitFieldDeclaration(FieldDeclarationSyntax node)
+    {
+        foreach (var declaration in node.Declaration.Variables)
+        {
+            CodeBase.LinkMember(declaration, Model, Document);
+        }
+        base.VisitFieldDeclaration(node);
+    }
+
     public override void VisitPropertyDeclaration(PropertyDeclarationSyntax node)
     {
         CodeBase.LinkMember(node, Model, Document);
@@ -50,7 +59,6 @@ public sealed class CSharpCodeBaseResolver : CSharpSyntaxWalker
         CodeBase.LinkMember(node, Model, Document);
         base.VisitMethodDeclaration(node);
     }
-
 
     public override void VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
     {
