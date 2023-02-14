@@ -21,7 +21,7 @@ public class Code
     public bool IsType => Symbol.Kind == SymbolKind.NamedType;
 
     /// <summary>Returns true if the code represents a member (method, property, etc...).</summary>
-    public bool IsMember => !IsType;
+    public bool IsMember => !IsType && Symbol.ContainingType is { };
 
     /// <summary>The code that uses this code.</summary>
     public CodeCollection UsedBy { get; } = new();
