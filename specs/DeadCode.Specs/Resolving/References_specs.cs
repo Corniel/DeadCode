@@ -1,5 +1,3 @@
-using System.Security.Permissions;
-
 namespace Resolving.References_specs;
 
 public class Ignores
@@ -22,7 +20,7 @@ public class Ignores
 public class Links
 {
     [Test]
-    public void new_instances()
+    public void constructors()
      => Setup.Collector().AddSnippet(@"
             
     public class Other { }
@@ -40,6 +38,39 @@ public class Links
             ["MyClass"] = Symbol.Array("MyClass.MyMethod()"),
             ["MyClass.MyMethod()"] = Symbol.Array(),
         });
+
+    [Test]
+    public void fields()
+        => Setup.Collector().AddSnippet(@"
+            
+    public class MyClass
+    {
+        public int MyMethod() => MyField;
+        public readonly int MyField = 42;
+    }")
+        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+        {
+            ["MyClass"] = Symbol.Array("MyClass.MyMethod()", "MyClass.MyField"),
+            ["MyClass.MyMethod()"] = Symbol.Array(),
+            ["MyClass.MyField"] = Symbol.Array("MyClass.MyMethod()"),
+            ["int"] = Symbol.Array("MyClass.MyMethod()", "MyClass.MyField"),
+        });
+
+    [Test]
+    public void methods()
+       => Setup.Collector().AddSnippet(@"
+            
+    public class MyClass
+    {
+        public void MyMethod() => Other();
+        public void Other() { }
+    }")
+       .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+       {
+           ["MyClass"] = Symbol.Array("MyClass.MyMethod()", "MyClass.Other()"),
+           ["MyClass.MyMethod()"] = Symbol.Array(),
+           ["MyClass.Other()"] = Symbol.Array("MyClass.MyMethod()"),
+       });
 
     [Test]
     public void properties()
@@ -114,94 +145,5 @@ public class Implements
         .And.HaveIsActive(
             "MyClass.Do()",
             "MyClass.Parent");
-    }
-}
-
-public class References_regonized
-{
-    [Test]
-    public void method()
-    {
-        Setup.Collector().AddSnippet(@"
-            
-    public class MyClass
-    {
-        protected void Other() { }
-
-        public void Do() => Other();
-    }")
-        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
-        {
-            ["MyClass"] = Symbol.Array("MyClass.Other()", "MyClass.Do()"),
-            ["MyClass.Other()"] = Symbol.Array("MyClass.Do()"),
-            ["MyClass.Do()"] = Symbol.Array(),
-        });
-    }
-
-    [Test]
-    public void property()
-    {
-        Setup.Collector().AddSnippet(@"
-            
-    public class MyClass
-    {
-        protected int Other { get; }
-
-        public int Do() => 42;
-    }")
-        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
-        {
-            ["MyClass"] = Symbol.Array("MyClass.Other", "MyClass.Do()"),
-            ["MyClass.Other"] = Symbol.Array("MyClass.Do()"),
-            ["MyClass.Do()"] = Symbol.Array(),
-            ["int"] = Symbol.Array("MyClass.Other", "MyClass.Do()"),
-        });
-    }
-
-    [Test]
-    public void new_ctor()
-    {
-        Setup.Collector().AddSnippet(@"
-            
-    public class MyClass
-    {
-        void Do()
-        {
-            _ = new Other();
-        }
-    }
-    class Other { }
-")
-        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
-        {
-            ["MyClass"] = Symbol.Array( "MyClass.Do()"),
-            ["MyClass.Do()"] = Symbol.Array(),
-            ["Other"] = Symbol.Array(),
-            ["Other.Other()"] = Symbol.Array("MyClass.Do()"),
-        });
-    }
-
-    [Test]
-    public void in_method_calls()
-    {
-        Setup.Collector().AddSnippet(@"
-            
-    public class MyClass
-    {
-        void Do()
-        {
-            string.Format(""{0}"", new Other());
-        }
-    }
-    class Other { }
-")
-        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
-        {
-            ["MyClass"] = Symbol.Array("MyClass.Do()"),
-            ["MyClass.Do()"] = Symbol.Array(),
-            ["Other"] = Symbol.Array(),
-            ["Other.Other()"] = Symbol.Array("MyClass.Do()"),
-            ["string.Format(string, object?)"] = Symbol.Array("MyClass.Do()"),
-        });
     }
 }

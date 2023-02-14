@@ -1,6 +1,6 @@
 namespace Resolving.Members_specs;
 
-public class Construcors_are
+public class Construcors
 {
     [Test]
     public void used_by_containing_and_parameter_types()
@@ -66,7 +66,7 @@ public class Construcors_are
     }")
        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
        {
-           ["MyBase"] = Symbol.Array("MyBase.MyBase()"),
+           ["MyBase"] = Symbol.Array("MyBase.MyBase()", "MyClass"),
            ["MyBase.MyBase()"] = Symbol.Array("MyBase", "MyClass.MyClass()"),
            ["MyClass"] = Symbol.Array("MyClass.MyClass()"),
            ["MyClass.MyClass()"] = Symbol.Array("MyClass"),
@@ -90,7 +90,7 @@ public class Construcors_are
         });
 }
 
-public class Enum_members_are
+public class Enum_members
 {
     [Test]
     public void used_by_containing_type()
@@ -107,7 +107,7 @@ public class Enum_members_are
         });
 }
 
-public class Fields_are
+public class Fields
 {
     [Test]
     public void used_by_containing_and_return_type()
@@ -123,9 +123,24 @@ public class Fields_are
             ["MyClass.MyField"] = Symbol.Array(),
             ["int"] = Symbol.Array("MyClass.MyField"),
         });
+
+    [Test]
+    public void include_constants()
+        => Setup.Collector().AddSnippet(@"
+            
+    public class MyClass
+    {
+        public const int MyConstant = 42;
+    }")
+        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+        {
+            ["MyClass"] = Symbol.Array("MyClass.MyConstant"),
+            ["MyClass.MyConstant"] = Symbol.Array(),
+            ["int"] = Symbol.Array("MyClass.MyConstant"),
+        });
 }
 
-public class Methods_are
+public class Methods
 {
     [Test]
     public void used_by_containing_return_and_parameter_types()
@@ -145,7 +160,7 @@ public class Methods_are
         });
 }
 
-public class Properties_are
+public class Properties
 {
     [Test]
     public void used_by_containing_and_return_type()
