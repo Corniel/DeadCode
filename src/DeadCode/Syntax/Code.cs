@@ -17,6 +17,12 @@ public class Code
     /// <summary>The code symbol.</summary>
     public ISymbol Symbol { get; }
 
+    /// <summary>Returns true if the code represents a type (class, interface, etc...).</summary>
+    public bool IsType => Symbol.Kind == SymbolKind.NamedType;
+
+    /// <summary>Returns true if the code represents a member (method, property, etc...).</summary>
+    public bool IsMember => !IsType;
+
     /// <summary>The code that uses this code.</summary>
     public CodeCollection UsedBy { get; } = new();
 

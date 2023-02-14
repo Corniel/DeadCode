@@ -22,7 +22,7 @@ public class Ignores
 public class Links
 {
     [Test]
-    public void new_instance()
+    public void new_instances()
      => Setup.Collector().AddSnippet(@"
             
     public class Other { }
@@ -35,9 +35,27 @@ public class Links
     }")
         .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
         {
-            ["Other"] = Symbol.Array("MyClass.MyMethod()"),
+            ["Other"] = Symbol.Array("Other.Other()"),
+            ["Other.Other()"] = Symbol.Array("MyClass.MyMethod()"),
             ["MyClass"] = Symbol.Array("MyClass.MyMethod()"),
             ["MyClass.MyMethod()"] = Symbol.Array(),
+        });
+
+    [Test]
+    public void properties()
+        => Setup.Collector().AddSnippet(@"
+            
+    public class MyClass
+    {
+        public int MyMethod() => MyProperty;
+        public int MyProperty => 42;
+    }")
+        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+        {
+            ["MyClass"] = Symbol.Array("MyClass.MyMethod()", "MyClass.MyProperty"),
+            ["MyClass.MyMethod()"] = Symbol.Array(),
+            ["MyClass.MyProperty"] = Symbol.Array("MyClass.MyMethod()"),
+            ["int"] = Symbol.Array("MyClass.MyMethod()", "MyClass.MyProperty"),
         });
 }
 

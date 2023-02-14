@@ -52,7 +52,9 @@ public sealed class CodeBase
     {
         if (model.GetDeclaredSymbol(declaration) is INamedTypeSymbol symbol)
         {
-            GetCode(symbol).Link(declaration, document);
+            var type = GetCode(symbol);
+            nodes[declaration] = type;
+            type.Link(declaration, document);
         }
     }
 
@@ -61,6 +63,7 @@ public sealed class CodeBase
         if (model.GetDeclaredSymbol(declaration) is { } symbol)
         {
             var member = GetCode(symbol);
+            nodes[declaration] = member;
             member.Link(declaration, document);
 
             var type = GetCode(symbol.ContainingType);
@@ -126,6 +129,11 @@ public sealed class CodeBase
             && TryGetCode(symbol) is { } code)
         {
             code.UsedBy.Add(parent);
+
+            if (code.IsMember)
+            {
+                GetCode(code.Symbol.ContainingType).UsedBy.Add(code);
+            }
         }
     }
 
