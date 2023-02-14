@@ -1,26 +1,24 @@
 ﻿namespace DeadCode.Syntax;
 
 [DebuggerDisplay("{Symbol}, Used by: {UsedBy.Count}, IsDead: {IsDead}")]
-public sealed class Code
+public class Code
 {
-    public static Code EntryPoint(ISymbol symbol) => new(symbol) { IsEntryPoint = true };
-
     public Code(ISymbol symbol)
     {
         Symbol = symbol;
     }
 
     /// <summary>The linked syntax node.</summary>
-    public SyntaxNode? Node { get; internal set; }
+    public SyntaxNode? Node { get; private set; }
 
     /// <summary>The linked document.</summary>
-    public Document? Document { get; internal set; }
+    public Document? Document { get; private set; }
 
     /// <summary>The code symbol.</summary>
     public ISymbol Symbol { get; }
 
     /// <summary>The code that uses this code.</summary>
-    public Usings UsedBy { get; } = new();
+    public CodeCollection UsedBy { get; } = new();
 
     /// <summary>True if this code is an entry point.</summary>
     public bool IsEntryPoint { get; internal set; }
@@ -48,6 +46,12 @@ public sealed class Code
 
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private bool _IsAlive;
+
+    public void Link(SyntaxNode node, Document document)
+    {
+        Node = Guard.NotNull(node, nameof(node));
+        Document = Guard.NotNull(document, nameof(document));
+    }
 
     [Pure]
     private bool IsAlive(Tracker tracker)

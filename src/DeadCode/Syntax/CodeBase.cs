@@ -18,73 +18,93 @@ public sealed class CodeBase
 
     public IReadOnlyCollection<Code> Code => lookup.Values;
 
-    public bool FullyResolved
-        => Code.All(c => c.Node is { })
-        && Code.Any(c => c.IsEntryPoint);
-
-
-    public Code? GetOrCreate(ISymbol symbol)
+    public Code? TryGetCode(ISymbol symbol)
     {
         if (symbol.Kind == SymbolKind.Local)
         {
             symbol = symbol.ContainingType;
         }
 
-        if (symbol.Is(SystemType.System_Void)
-            || symbol.Kind == SymbolKind.Discard)
+        return symbol.Is(SystemType.System_Void)
+            || symbol.Kind == SymbolKind.Discard
+            ? null
+            : GetCode(symbol);
+    }
+
+    public Code GetCode(ISymbol symbol)
+    {
+        lock (locker)
         {
-            return null;
-        }
-        else
-        {
-            lock (locker)
+            if (lookup.TryGetValue(symbol, out var code))
             {
-                if (!lookup.TryGetValue(symbol, out var code))
-                {
-                    code = new(symbol);
-                    lookup[symbol] = code;
-                }
                 return code;
+            }
+            else
+            {
+                var type = new Code(symbol);
+                lookup[symbol] = type;
+                return type;
             }
         }
     }
 
-    private Code GetOrCreate(ISymbol symbol, SyntaxNode node, Document document)
+    public void LinkType(SyntaxNode declaration, SemanticModel model, Document document)
     {
-        var code = GetOrCreate(symbol)!;
-        code.Node = node;
-        code.Document = document;
-        nodes[node] = code;
-        return code;
+        if (model.GetDeclaredSymbol(declaration) is INamedTypeSymbol symbol)
+        {
+            GetCode(symbol).Link(declaration, document);
+        }
     }
 
-    public Code? Parent(SyntaxNode node)
+    public Code? LinkMember(SyntaxNode declaration, SemanticModel model, Document document)
+    {
+        if (model.GetDeclaredSymbol(declaration) is { } symbol)
+        {
+            var method = GetCode(symbol);
+            method.Link(declaration, document);
+
+            var type = GetCode(symbol.ContainingType);
+            type.UsedBy.Add(method);
+
+            return method;
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public void LinkConstructor(SyntaxNode declaration, SyntaxNode? initializer, SemanticModel model, Document document)
+    {
+        if (LinkMember(declaration, model, document) is { } ctor)
+        {
+            // if the ctor references this or base, that ctor is used by this one.
+            if (initializer is { } && model.GetSymbolInfo(initializer).Symbol is IMethodSymbol init)
+            {
+                GetCode(init).UsedBy.Add(ctor);
+            }
+
+            // Default constructor is used by its type.
+            if (ctor.Symbol.IsDefaultConstructor())
+            {
+                ctor.UsedBy.Add(GetCode(ctor.Symbol.ContainingType));
+            }
+        }
+    }
+
+    public void LinkReference(SyntaxNode reference, SemanticModel model, Document document)
+    {
+        if (Parent(reference) is { } parent
+            && model.GetSymbolInfo(reference).Symbol is { } symbol
+            && TryGetCode(symbol) is { } code)
+        {
+            code.UsedBy.Add(parent);
+        }
+    }
+
+    private Code? Parent(SyntaxNode node)
     {
         return node.Ancestors().Select(Find).FirstOrDefault(c => c is { });
         Code? Find(SyntaxNode node) => nodes.TryGetValue(node, out var code) ? code : null;
-    }
-
-    public Code SetNode(INamedTypeSymbol type, SyntaxNode node, Document document)
-        => GetOrCreate(type, node, document);
-
-    public Code SetNode(IMethodSymbol method, SyntaxNode node, Document document)
-    {
-        var code = GetOrCreate(method, node, document);
-        GetOrCreate(method.ContainingType)!.UsedBy.Add(code);
-        GetOrCreate(method.ReturnType)?.UsedBy.Add(code);
-
-        foreach (var type in method.TypeArguments.Where(t => t.TypeKind != TypeKind.TypeParameter))
-        {
-            GetOrCreate(type)!.UsedBy.Add(code);
-        }
-        return code;
-    }
-
-    public Code SetNode(IPropertySymbol prop, SyntaxNode node, Document document)
-    {
-        var code = GetOrCreate(prop, node, document);
-        GetOrCreate(prop.ContainingType)!.UsedBy?.Add(code);
-        GetOrCreate(prop.Type)?.UsedBy?.Add(code);
-        return code;
     }
 }

@@ -26,6 +26,16 @@ public static class DeadCodeSymbolExtensions
     public static bool IsAttribute(this ITypeSymbol type)
         => type.IsAssignableTo(SystemType.System_Attribute);
 
+    /// <summary>
+    /// Returns true if the method is a constructor, has no parameters or is
+    /// the only constructor.
+    /// </summary>
+    [Pure]
+    public static bool IsDefaultConstructor(this ISymbol symbol)
+        => symbol is IMethodSymbol method
+        && method.MethodKind == MethodKind.Constructor
+        && (!method.Parameters.Any() || method.ContainingType.Constructors.Length == 1);
+
     [Pure]
     public static bool IsException(this ITypeSymbol type)
         => type.IsAssignableTo(SystemType.System_Exception);

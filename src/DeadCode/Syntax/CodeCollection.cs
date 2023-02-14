@@ -2,7 +2,7 @@
 
 [DebuggerDisplay("Count = {Count}")]
 [DebuggerTypeProxy(typeof(Diagnostics.CollectionDebugView))]
-public sealed class Usings : IReadOnlyCollection<Code>
+public sealed class CodeCollection : IReadOnlyCollection<Code>
 {
     [DebuggerBrowsable(DebuggerBrowsableState.Never)]
     private readonly HashSet<Code> Set = new();
