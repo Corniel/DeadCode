@@ -23,6 +23,7 @@ internal class CollectionDebugView
     /// Every time the enumeration is shown in the debugger, a new array is created.
     /// By doing this, it is always in sync with the current state of the enumeration.
     /// </remarks>
+    [EntryPoint]
     [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
     public object[] Items => enumeration.Cast<object>().ToArray();
 }

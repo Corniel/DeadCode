@@ -35,10 +35,7 @@ public static class DeadCodeAnalyzer
 
         foreach (var code in codeBase.Code)
         {
-            if(code.Symbol is IMethodSymbol method)
-            {
-                code.IsEntryPoint = DepedencyResolver.IsEntryPoint(method);
-            }
+            code.IsEntryPoint = DepedencyResolver.IsEntryPoint(code.Symbol);
         }
 
         Console.WriteLine($"used: {codeBase.Code.Count(c => !c.IsDead)}");
