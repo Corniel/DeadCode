@@ -3,6 +3,35 @@
 public class Resolves
 {
     [Test]
+    public void base_types()
+        => Setup.Collector().AddSnippet(@"
+        
+            public class MyBase { }
+            public class MyClass : MyBase { }
+
+        ")
+        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+        {
+            ["MyClass"] = Symbol.Array(),
+            ["MyBase"] = Symbol.Array("MyClass")
+        });
+
+    [Test]
+    public void dependent_interfaces()
+        => Setup.Collector().AddSnippet(@"
+        
+            public interface MyInterface { }
+            public class MyClass : MyInterface { }
+
+        ")
+        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+        {
+            ["MyClass"] = Symbol.Array(),
+            ["MyInterface"] = Symbol.Array("MyClass")
+        });
+
+
+    [Test]
     public void classes()
         => Setup.Collector().AddSnippet("public class MyClass { }")
         .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
