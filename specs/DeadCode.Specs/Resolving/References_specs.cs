@@ -1,27 +1,44 @@
-using FluentAssertions;
-using Specs.Tooling;
+using System.Security.Permissions;
 
-namespace Resolve_dependencies_specs;
+namespace Resolving.References_specs;
 
-public class Ctor
+public class Ignores
 {
     [Test]
-    public void Depends_on_base()
-    {
-        Setup.Collector().AddSnippet(@"
+    public void Void()
+        => Setup.Collector().AddSnippet(@"
             
     public class MyClass
     {
-        public MyClass() { }
-        public MyClass(MyClass other) : this(){ }
+        public void MyMethod() { };
     }")
         .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
         {
-            ["MyClass"] = Symbol.Array("MyClass.MyClass()", "MyClass.MyClass(MyClass)"),
-            ["MyClass.MyClass()"] = Symbol.Array("MyClass", "MyClass.MyClass(MyClass)"),
-            ["MyClass.MyClass(MyClass)"] = Symbol.Array(),
+            ["MyClass"] = Symbol.Array("MyClass.MyMethod()"),
+            ["MyClass.MyMethod()"] = Symbol.Array(),
         });
-    }
+}
+
+public class Links
+{
+    [Test]
+    public void new_instance()
+     => Setup.Collector().AddSnippet(@"
+            
+    public class Other { }
+    public class MyClass
+    {
+        public void MyMethod() 
+        {
+            _ = new Other();
+        };
+    }")
+        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+        {
+            ["Other"] = Symbol.Array("MyClass.MyMethod()"),
+            ["MyClass"] = Symbol.Array("MyClass.MyMethod()"),
+            ["MyClass.MyMethod()"] = Symbol.Array(),
+        });
 }
 
 public class Overrides

@@ -1,4 +1,4 @@
-﻿namespace Resolve_code_types_specs;
+﻿namespace Resolving.Code_types_specs;
 
 public class Resolves
 {

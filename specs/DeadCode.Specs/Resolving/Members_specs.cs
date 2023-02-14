@@ -1,4 +1,4 @@
-namespace Resolve_members_specs;
+namespace Resolving.Members_specs;
 
 public class Construcors_are
 {
@@ -49,6 +49,43 @@ public class Construcors_are
         {
             ["MyClass"] = Symbol.Array("MyClass.MyClass(int)"),
             ["MyClass.MyClass(int)"] = Symbol.Array("MyClass"),
+            ["int"] = Symbol.Array("MyClass.MyClass(int)"),
+        });
+
+    [Test]
+    public void using_base_ctor()
+       => Setup.Collector().AddSnippet(@"
+            
+    public class MyBase
+    {
+        public MyBase() { }    
+    }
+    public class MyClass : MyBase
+    {
+        public MyClass() : base() { }
+    }")
+       .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+       {
+           ["MyBase"] = Symbol.Array("MyBase.MyBase()"),
+           ["MyBase.MyBase()"] = Symbol.Array("MyBase", "MyClass.MyClass()"),
+           ["MyClass"] = Symbol.Array("MyClass.MyClass()"),
+           ["MyClass.MyClass()"] = Symbol.Array("MyClass"),
+       });
+
+    [Test]
+    public void used_by_referenced_ctor()
+        => Setup.Collector().AddSnippet(@"
+            
+    public class MyClass
+    {
+        public MyClass() : this(42) { }
+        public MyClass(int arg) { }
+    }")
+        .CodeBase().Should().HaveUsedBys(new Dictionary<Symbol, Symbol[]>()
+        {
+            ["MyClass"] = Symbol.Array("MyClass.MyClass()", "MyClass.MyClass(int)"),
+            ["MyClass.MyClass()"] = Symbol.Array("MyClass"),
+            ["MyClass.MyClass(int)"] = Symbol.Array("MyClass.MyClass()"),
             ["int"] = Symbol.Array("MyClass.MyClass(int)"),
         });
 }
